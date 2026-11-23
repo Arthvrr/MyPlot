@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyPlot — Graphiques Modernes</title>
+    <title>Plot — Graphiques Modernes</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             color-scheme: light;
@@ -38,6 +39,7 @@
             --shadow-card: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
             --shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.05);
             --shadow-primary: 0 8px 16px rgba(0, 0, 0, 0.15);
+            --shadow-menu: 0 18px 40px -8px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
             --radius-lg: 24px;
             --radius-md: 12px;
         }
@@ -71,6 +73,7 @@
             --shadow-card: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
             --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.45);
             --shadow-primary: 0 8px 20px rgba(0, 0, 0, 0.5);
+            --shadow-menu: 0 22px 50px -8px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
 
         * {
@@ -90,7 +93,7 @@
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        /* --- Top-bar : Repli + MyPlot à gauche, Toggle Dark Mode à droite du panel --- */
+        /* --- Top-bar : Repli + Plot à gauche, Toggle Dark Mode à droite du panel --- */
         .top-bar {
             position: absolute;
             top: 0;
@@ -185,7 +188,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin: 1.5rem 0 0.85rem 0;
+            margin: 1.4rem 0 0.8rem 0;
+            gap: 8px;
         }
         .section-header:first-child { margin-top: 0.4rem; }
 
@@ -198,27 +202,38 @@
             margin: 0;
         }
 
+        .section-actions {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .btn-text-subtle {
             background: transparent;
-            border: none;
+            border: 1px solid transparent;
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 0.74rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            padding: 4px 6px;
-            border-radius: 6px;
-            transition: color 0.15s, background 0.15s;
+            padding: 4px 7px;
+            border-radius: 7px;
+            transition: color 0.15s, background 0.15s, border-color 0.15s;
         }
         .btn-text-subtle:hover {
             color: var(--text-main);
             background: var(--card-hover);
+            border-color: var(--border);
+        }
+        .btn-text-subtle.active {
+            color: var(--primary-fg);
+            background: var(--primary);
         }
         .btn-text-subtle svg { width: 13px; height: 13px; }
 
-        .input-group { margin-bottom: 1rem; }
+        .input-group { margin-bottom: 0.95rem; }
         label {
             display: block;
             font-size: 0.83rem;
@@ -244,6 +259,37 @@
             box-shadow: 0 0 0 3px var(--input-focus-ring);
         }
 
+        /* Formats (Ratios prédéfinis) */
+        .ratios-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            margin-bottom: 0.35rem;
+        }
+
+        .ratio-chip {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 7px 4px;
+            cursor: pointer;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-align: center;
+            transition: all 0.18s ease;
+        }
+        .ratio-chip:hover {
+            background: var(--card-hover);
+            color: var(--text-main);
+            border-color: var(--border-strong);
+        }
+        .ratio-chip.active {
+            background: var(--primary);
+            color: var(--primary-fg);
+            border-color: var(--primary);
+        }
+
         /* Palettes harmonisées */
         .palettes-grid {
             display: grid;
@@ -256,7 +302,7 @@
             background: var(--input-bg);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 8px 8px;
+            padding: 8px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
@@ -296,8 +342,8 @@
         .toggles-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px 10px;
-            margin-bottom: 0.5rem;
+            gap: 5px 10px;
+            margin-bottom: 0.35rem;
         }
         .toggle-container {
             display: flex;
@@ -305,8 +351,8 @@
             gap: 8px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.83rem;
-            padding: 0.35rem 0;
+            font-size: 0.82rem;
+            padding: 0.34rem 0;
             margin-bottom: 0;
             color: var(--text-main);
         }
@@ -315,6 +361,7 @@
             height: 16px;
             accent-color: var(--primary);
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         /* Séries */
@@ -335,7 +382,7 @@
             grid-template-columns: 34px 1fr;
         }
 
-        .donut-hint {
+        .circular-hint {
             font-size: 0.75rem;
             color: var(--text-muted);
             background: var(--card-subtle);
@@ -468,10 +515,11 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 3rem;
+            padding: 4.5rem 2.5rem 2.5rem 2.5rem;
             position: relative;
             background: var(--bg-gradient);
             transition: background 0.25s ease;
+            overflow: hidden;
         }
 
         /* Stage wrapper : affiche le damier de transparence sans qu'il soit capturé par html2canvas */
@@ -499,8 +547,12 @@
 
         .export-container {
             background: var(--card);
-            padding: 2.75rem 2.75rem 3.75rem 2.75rem;
+            padding: 2.5rem 2.5rem 3.4rem 2.5rem;
             width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             position: relative;
             transition: background-color 0.25s ease;
         }
@@ -516,18 +568,43 @@
 
         .export-title {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 1.45rem;
             font-weight: 700;
             letter-spacing: -0.02em;
             color: var(--text-main);
             margin-top: 0;
-            margin-bottom: 1.75rem;
+            margin-bottom: 1.25rem;
             display: none;
+            flex-shrink: 0;
         }
 
-        #mainChart { width: 100%; }
+        /* Badge moyenne pour les graphiques circulaires / radar */
+        .avg-badge {
+            display: none;
+            align-self: center;
+            margin-bottom: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            background: rgba(14, 165, 233, 0.14);
+            color: #0284c7;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            flex-shrink: 0;
+        }
+        [data-theme="dark"] .avg-badge {
+            background: rgba(56, 189, 248, 0.16);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.32);
+        }
 
-        /* Source (bas à gauche, en symétrie exacte avec Made with MyPlot) */
+        #mainChart {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Source (bas à gauche, en symétrie exacte avec Made with Plot) */
         .chart-source {
             position: absolute;
             bottom: 14px;
@@ -546,8 +623,8 @@
             user-select: none;
         }
 
-        /* Badge Made With MyPlot (bas à droite) */
-        .made-with-MyPlot {
+        /* Badge Made With Plot (bas à droite) */
+        .made-with-plot {
             position: absolute;
             bottom: 14px;
             right: 16px;
@@ -568,16 +645,16 @@
             text-transform: uppercase;
             user-select: none;
         }
-        .made-with-MyPlot svg {
+        .made-with-plot svg {
             width: 12px;
             height: 12px;
             stroke: var(--text-main);
             fill: none;
         }
-        .made-with-MyPlot span { color: var(--text-muted); }
-        .made-with-MyPlot b { color: var(--text-main); }
+        .made-with-plot span { color: var(--text-muted); }
+        .made-with-plot b { color: var(--text-main); }
 
-        /* Actions */
+        /* Actions & Dropdown Export */
         .actions {
             position: absolute;
             top: 1.5rem;
@@ -585,14 +662,67 @@
             display: flex;
             gap: 10px;
             align-items: center;
-            z-index: 40;
+            z-index: 60;
+        }
+
+        .export-dropdown {
+            position: relative;
+        }
+
+        .export-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 235px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: var(--shadow-menu);
+            opacity: 0;
+            transform: translateY(-6px) scale(0.98);
+            pointer-events: none;
+            transition: opacity 0.16s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 100;
+        }
+        .export-menu.open {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        .export-menu-item {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            padding: 9px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-align: left;
+            color: var(--text-main);
+            transition: background 0.15s ease;
+        }
+        .export-menu-item:hover { background: var(--card-hover); }
+        .export-menu-item svg { width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0; }
+        .export-menu-item:hover svg { color: var(--text-main); }
+        .export-menu-text { display: flex; flex-direction: column; gap: 1px; }
+        .export-menu-title { font-size: 0.83rem; font-weight: 600; color: var(--text-main); }
+        .export-menu-sub { font-size: 0.7rem; color: var(--text-muted); }
+
+        .export-menu-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 5px 6px;
         }
 
         .btn-download {
             background: var(--primary);
             color: var(--primary-fg);
             border: none;
-            padding: 0 1.3rem;
+            padding: 0 1.15rem 0 1.25rem;
             height: 40px;
             border-radius: 100px;
             font-size: 0.88rem;
@@ -673,9 +803,9 @@
         #captureArea.is-fullscreen {
             position: fixed;
             inset: 0;
-            width: 100vw;
-            height: 100vh;
-            max-width: none;
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
             border-radius: 0;
             box-shadow: none;
             border: none;
@@ -692,7 +822,7 @@
         #captureArea.is-fullscreen .btn-exit-fullscreen { display: flex; }
         #captureArea.is-fullscreen .export-title { margin-bottom: 1rem; flex-shrink: 0; }
         #captureArea.is-fullscreen #mainChart { width: 100%; flex: 1; min-height: 0; }
-        #captureArea.is-fullscreen .made-with-MyPlot { bottom: 1.15rem; right: 1.5rem; }
+        #captureArea.is-fullscreen .made-with-plot { bottom: 1.15rem; right: 1.5rem; }
         #captureArea.is-fullscreen .chart-source { bottom: 1.15rem; left: 1.5rem; }
 
         /* Toast notification */
@@ -749,7 +879,7 @@
             </button>
             <div class="app-brand">
                 <i data-lucide="bar-chart-2"></i>
-                <span>MyPlot</span>
+                <span>Plot</span>
             </div>
         </div>
         <button class="btn-theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Changer de thème">
@@ -778,20 +908,37 @@
         <div class="input-group">
             <label for="chartType">Type de graphique</label>
             <select id="chartType" onchange="onChartTypeChange()">
-                <option value="bar">Barres</option>
-                <option value="line">Courbe</option>
-                <option value="area">Zone</option>
-                <option value="donut">Anneau</option>
+                <optgroup label="Comparaison & Évolution">
+                    <option value="bar">Barres verticales</option>
+                    <option value="bar-horizontal">Barres horizontales</option>
+                    <option value="line">Courbe</option>
+                    <option value="step">Escalier (Step)</option>
+                    <option value="area">Zone</option>
+                    <option value="scatter">Nuage de points</option>
+                    <option value="radar">Radar</option>
+                </optgroup>
+                <optgroup label="Répartition & Proportions">
+                    <option value="donut">Anneau (Donut)</option>
+                    <option value="pie">Camembert (Pie)</option>
+                    <option value="polarArea">Aire polaire</option>
+                    <option value="radialBar">Jauges radiales</option>
+                </optgroup>
             </select>
+        </div>
+
+        <div class="input-group">
+            <label>Format d'affichage & export</label>
+            <div class="ratios-grid" id="ratiosGrid"></div>
         </div>
 
         <div class="toggles-grid">
             <label class="toggle-container"><input type="checkbox" id="showLegend" onchange="onToggleChange()"> <span>Légende</span></label>
             <label class="toggle-container"><input type="checkbox" id="showLabels" onchange="onToggleChange()"> <span>Valeurs</span></label>
-            <label class="toggle-container"><input type="checkbox" id="showBorders" onchange="onToggleChange()"> <span>Bordures</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showTrendline" onchange="onToggleChange('trendline')"> <span>Tendance</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showAverage" onchange="onToggleChange('average')"> <span>Moyenne</span></label>
             <label class="toggle-container"><input type="checkbox" id="showShadows" onchange="onToggleChange()"> <span>Ombres</span></label>
             <label class="toggle-container"><input type="checkbox" id="transparentBg" onchange="onToggleChange()"> <span>Fond transparent</span></label>
-            <label class="toggle-container"><input type="checkbox" id="stackedMode" onchange="onToggleChange()"> <span>Empilé</span></label>
+            <label class="toggle-container"><input type="checkbox" id="stackedMode" onchange="onToggleChange('stacked')"> <span>Empilé</span></label>
         </div>
 
         <div class="section-header">
@@ -802,18 +949,26 @@
         <div class="section-header">
             <div class="section-title">Séries (Légende)</div>
         </div>
-        <div id="donutHint" class="donut-hint">L'anneau affiche la première série et utilise la couleur de chaque donnée.</div>
+        <div id="circularHint" class="circular-hint">Ce graphique affiche la première série et utilise la couleur de chaque donnée.</div>
         <div id="seriesList" class="series-list"></div>
         <button class="btn-add" id="addSeriesBtn" onclick="addSeries()">+ Ajouter une série</button>
 
         <div class="section-header">
             <div class="section-title">Données</div>
+            <div class="section-actions">
+                <button type="button" class="btn-text-subtle" id="sortAscBtn" onclick="sortRows('asc')" title="Trier par ordre croissant">
+                    <i data-lucide="arrow-up-narrow-wide"></i> Croissant
+                </button>
+                <button type="button" class="btn-text-subtle" id="sortDescBtn" onclick="sortRows('desc')" title="Trier par ordre décroissant">
+                    <i data-lucide="arrow-down-wide-narrow"></i> Décroissant
+                </button>
+            </div>
         </div>
         <div id="dataList"></div>
         <button class="btn-add" onclick="addRow()">+ Nouvelle donnée</button>
     </aside>
 
-    <main class="main-content">
+    <main class="main-content" id="mainContent">
         <div class="actions">
             <button class="btn-icon" id="fullscreenBtn" onclick="toggleFullscreen()" title="Plein écran">
                 <i data-lucide="maximize"></i>
@@ -824,9 +979,57 @@
             <button class="btn-secondary" id="copyImgBtn" onclick="copyImageHD()" title="Copier l'image HD dans le presse-papier">
                 <i data-lucide="copy"></i> Copier
             </button>
-            <button class="btn-download" id="downloadBtn" onclick="exportHD()">
-                <i data-lucide="download"></i> Exporter HD
-            </button>
+            <div class="export-dropdown" id="exportDropdown">
+                <button class="btn-download" id="downloadBtn" onclick="toggleExportMenu(event)">
+                    <i data-lucide="download"></i> Exporter <i data-lucide="chevron-down" style="width: 14px; height: 14px;"></i>
+                </button>
+                <div class="export-menu" id="exportMenu">
+                    <button type="button" class="export-menu-item" onclick="exportFile('png')">
+                        <i data-lucide="image"></i>
+                        <div class="export-menu-text">
+                            <span class="export-menu-title">PNG (HD ×4)</span>
+                            <span class="export-menu-sub">Netteté max, gère la transparence</span>
+                        </div>
+                    </button>
+                    <button type="button" class="export-menu-item" onclick="exportFile('jpeg')">
+                        <i data-lucide="image"></i>
+                        <div class="export-menu-text">
+                            <span class="export-menu-title">JPEG (HD ×4)</span>
+                            <span class="export-menu-sub">Format universel léger, fond plein</span>
+                        </div>
+                    </button>
+                    <button type="button" class="export-menu-item" onclick="exportFile('webp')">
+                        <i data-lucide="image"></i>
+                        <div class="export-menu-text">
+                            <span class="export-menu-title">WebP (HD ×4)</span>
+                            <span class="export-menu-sub">Optimisé web + transparence</span>
+                        </div>
+                    </button>
+                    <div class="export-menu-divider"></div>
+                    <button type="button" class="export-menu-item" onclick="exportFile('pdf')">
+                        <i data-lucide="file-text"></i>
+                        <div class="export-menu-text">
+                            <span class="export-menu-title">PDF (Document HD)</span>
+                            <span class="export-menu-sub">Prêt pour rapports & impressions</span>
+                        </div>
+                    </button>
+                    <button type="button" class="export-menu-item" onclick="exportFile('svg')">
+                        <i data-lucide="code-2"></i>
+                        <div class="export-menu-text">
+                            <span class="export-menu-title">SVG (Vectoriel)</span>
+                            <span class="export-menu-sub">Zoom infini pour Figma / Keynote</span>
+                        </div>
+                    </button>
+                    <div class="export-menu-divider"></div>
+                    <button type="button" class="export-menu-item" onclick="exportFile('csv')">
+                        <i data-lucide="table"></i>
+                        <div class="export-menu-text">
+                            <span class="export-menu-title">CSV (Données)</span>
+                            <span class="export-menu-sub">Tableau compatible Excel / Sheets</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="export-stage" id="exportStage">
@@ -835,10 +1038,11 @@
                     <i data-lucide="minimize"></i>
                 </button>
                 <h2 id="displayTitle" class="export-title"></h2>
+                <div id="avgBadge" class="avg-badge"></div>
                 <div id="mainChart"></div>
                 <div id="displaySource" class="chart-source"></div>
-                <div class="made-with-MyPlot" aria-hidden="true">
-                    <i data-lucide="layout"></i><span>Made with <b>MyPlot</b></span>
+                <div class="made-with-plot" aria-hidden="true">
+                    <i data-lucide="layout"></i><span>Made with <b>Plot</b></span>
                 </div>
             </div>
         </div>
@@ -847,7 +1051,24 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
-        const STORAGE_KEY = 'MyPlot-state-v2';
+        const STORAGE_KEY = 'plot-state-v2';
+
+        const VALID_CHART_TYPES = [
+            'bar', 'bar-horizontal', 'line', 'step', 'area',
+            'scatter', 'radar', 'donut', 'pie', 'polarArea', 'radialBar'
+        ];
+
+        const CIRCULAR_TYPES = ['donut', 'pie', 'polarArea', 'radialBar'];
+        const TRENDLINE_TYPES = ['bar', 'line', 'step', 'area', 'scatter'];
+
+        const ASPECT_RATIOS = [
+            { id: 'auto', label: 'Auto', ratio: null },
+            { id: '16:9', label: '16:9', ratio: 16 / 9 },
+            { id: '4:3',  label: '4:3',  ratio: 4 / 3 },
+            { id: '1:1',  label: '1:1',  ratio: 1 },
+            { id: '4:5',  label: '4:5',  ratio: 4 / 5 },
+            { id: '9:16', label: '9:16', ratio: 9 / 16 }
+        ];
 
         const PALETTES = [
             {
@@ -889,13 +1110,18 @@
         ];
 
         let chart = null;
-        let currentChartType = null;
+        let currentChartSignature = null;
         let isDarkMode = false;
         let toastTimer = null;
         let resizeRenderTimer = null;
+        let lastSortDir = null;
 
         function getFullscreenElement() {
             return document.fullscreenElement || document.webkitFullscreenElement || null;
+        }
+
+        function isCircularType(type) {
+            return CIRCULAR_TYPES.includes(type);
         }
 
         function getPaletteColors(paletteId, dark = isDarkMode) {
@@ -909,9 +1135,11 @@
                 title: '',
                 source: '',
                 chartType: 'bar',
+                aspectRatio: 'auto',
                 showLegend: true,
                 showLabels: false,
-                showBorders: false,
+                showTrendline: false,
+                showAverage: false,
                 showShadows: false,
                 transparentBg: false,
                 stacked: false,
@@ -940,17 +1168,19 @@
             toastTimer = setTimeout(() => el.classList.remove('visible'), 2400);
         }
 
-        /* --- Encodage / Décodage URL sans backend (UTF-8 safe Base64URL) --- */
+        /* --- Encodage / Décodage URL sans backend --- */
         function encodeStateToHash(st) {
             const compact = {
-                v: 2,
+                v: 3,
                 dk: isDarkMode ? 1 : 0,
                 t: st.title,
                 so: st.source,
                 ct: st.chartType,
+                ar: st.aspectRatio || 'auto',
                 l: st.showLegend ? 1 : 0,
                 dl: st.showLabels ? 1 : 0,
-                b: st.showBorders ? 1 : 0,
+                trd: st.showTrendline ? 1 : 0,
+                avg: st.showAverage ? 1 : 0,
                 sh: st.showShadows ? 1 : 0,
                 tr: st.transparentBg ? 1 : 0,
                 st: st.stacked ? 1 : 0,
@@ -973,15 +1203,18 @@
             if (!data || !Array.isArray(data.s) || !Array.isArray(data.r) || data.s.length === 0) {
                 throw new Error('Format invalide');
             }
+            const validRatio = ASPECT_RATIOS.some(a => a.id === data.ar) ? data.ar : 'auto';
             return {
                 dark: typeof data.dk === 'number' ? data.dk === 1 : null,
                 state: {
                     title: String(data.t || ''),
                     source: String(data.so || ''),
-                    chartType: ['bar', 'line', 'area', 'donut'].includes(data.ct) ? data.ct : 'bar',
+                    chartType: VALID_CHART_TYPES.includes(data.ct) ? data.ct : 'bar',
+                    aspectRatio: validRatio,
                     showLegend: Boolean(data.l),
                     showLabels: Boolean(data.dl),
-                    showBorders: Boolean(data.b),
+                    showTrendline: Boolean(data.trd),
+                    showAverage: Boolean(data.avg),
                     showShadows: Boolean(data.sh),
                     transparentBg: Boolean(data.tr),
                     stacked: Boolean(data.st),
@@ -1030,6 +1263,8 @@
                     const parsed = JSON.parse(raw);
                     if (parsed && Array.isArray(parsed.series) && parsed.series.length > 0 && Array.isArray(parsed.rows)) {
                         state = { ...createDefaultState(isDarkMode), ...parsed };
+                        if (!VALID_CHART_TYPES.includes(state.chartType)) state.chartType = 'bar';
+                        if (!ASPECT_RATIOS.some(a => a.id === state.aspectRatio)) state.aspectRatio = 'auto';
                         normalizeRowsValues();
                         return;
                     }
@@ -1052,20 +1287,24 @@
 
         function resetToDefault() {
             state = createDefaultState(isDarkMode);
+            lastSortDir = null;
+            updateSortButtonsUI();
             if (window.location.hash.startsWith('#data=')) {
                 history.replaceState(null, '', window.location.pathname + window.location.search);
             }
             syncControlsFromState();
+            renderRatios();
             renderPalettes();
             renderSeriesList();
             renderDataList();
+            applyAspectRatioLayout();
             updateUI(true);
             showToast('Graphique réinitialisé');
         }
 
         /* --- Thème --- */
         function initTheme() {
-            const saved = localStorage.getItem('MyPlot-theme');
+            const saved = localStorage.getItem('plot-theme');
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             applyTheme(saved ? saved === 'dark' : prefersDark, false);
         }
@@ -1073,7 +1312,7 @@
         function applyTheme(dark, shouldUpdateChart = true) {
             isDarkMode = dark;
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-            localStorage.setItem('MyPlot-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('plot-theme', dark ? 'dark' : 'light');
 
             const themeBtn = document.getElementById('themeToggleBtn');
             themeBtn.innerHTML = `<i data-lucide="${dark ? 'sun' : 'moon'}"></i>`;
@@ -1110,7 +1349,8 @@
             document.getElementById('chartType').value = state.chartType;
             document.getElementById('showLegend').checked = state.showLegend;
             document.getElementById('showLabels').checked = state.showLabels;
-            document.getElementById('showBorders').checked = state.showBorders;
+            document.getElementById('showTrendline').checked = state.showTrendline;
+            document.getElementById('showAverage').checked = state.showAverage;
             document.getElementById('showShadows').checked = state.showShadows;
             document.getElementById('transparentBg').checked = state.transparentBg;
             document.getElementById('stackedMode').checked = state.stacked;
@@ -1119,17 +1359,41 @@
         function onMetaInput() {
             state.title = document.getElementById('chartTitle').value;
             state.source = document.getElementById('chartSource').value;
-            updateUI(false);
+            updateHeaderAndFooterDOM();
+            if (state.aspectRatio !== 'auto' || getFullscreenElement()) {
+                applyAspectRatioLayout();
+                scheduleCleanRerender(80);
+            } else {
+                saveStateToStorage();
+            }
         }
 
-        function onToggleChange() {
+        function onToggleChange(source) {
             state.showLegend = document.getElementById('showLegend').checked;
             state.showLabels = document.getElementById('showLabels').checked;
-            state.showBorders = document.getElementById('showBorders').checked;
+            state.showTrendline = document.getElementById('showTrendline').checked;
+            state.showAverage = document.getElementById('showAverage').checked;
             state.showShadows = document.getElementById('showShadows').checked;
             state.transparentBg = document.getElementById('transparentBg').checked;
             state.stacked = document.getElementById('stackedMode').checked;
-            updateUI(false);
+
+            // Évite le conflit ApexCharts entre mode empilé multi-séries et série mixte de tendance
+            if (source === 'trendline' && state.showTrendline && state.stacked && state.series.length > 1) {
+                state.stacked = false;
+                document.getElementById('stackedMode').checked = false;
+                showToast('Mode empilé désactivé pour afficher la courbe de tendance');
+            } else if (source === 'stacked' && state.stacked && state.showTrendline && state.series.length > 1) {
+                state.showTrendline = false;
+                document.getElementById('showTrendline').checked = false;
+                showToast('Courbe de tendance désactivée en mode empilé');
+            }
+
+            if (source === 'trendline' && state.showTrendline && !TRENDLINE_TYPES.includes(state.chartType)) {
+                showToast('La courbe de tendance s’affiche sur Barres, Courbe, Escalier, Zone et Nuage');
+            }
+
+            const needsRecreate = (source === 'trendline' || source === 'stacked' || source === 'average');
+            updateUI(needsRecreate);
         }
 
         function onChartTypeChange() {
@@ -1137,6 +1401,62 @@
             renderSeriesList();
             renderDataList();
             updateUI(true);
+        }
+
+        /* --- Formats prédéfinis (Aspect Ratio) --- */
+        function renderRatios() {
+            const grid = document.getElementById('ratiosGrid');
+            grid.innerHTML = '';
+            ASPECT_RATIOS.forEach(item => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'ratio-chip' + (state.aspectRatio === item.id ? ' active' : '');
+                btn.textContent = item.label;
+                btn.onclick = () => selectAspectRatio(item.id);
+                grid.appendChild(btn);
+            });
+        }
+
+        function selectAspectRatio(ratioId) {
+            state.aspectRatio = ratioId;
+            renderRatios();
+            applyAspectRatioLayout();
+            saveStateToStorage();
+            renderChart(false);
+        }
+
+        function applyAspectRatioLayout() {
+            const stage = document.getElementById('exportStage');
+            const mainEl = document.getElementById('mainContent');
+
+            if (getFullscreenElement()) {
+                stage.style.width = '';
+                stage.style.height = '';
+                stage.style.maxWidth = '';
+                return;
+            }
+
+            const ratioDef = ASPECT_RATIOS.find(r => r.id === state.aspectRatio);
+            if (!ratioDef || !ratioDef.ratio) {
+                stage.style.width = '100%';
+                stage.style.height = 'auto';
+                stage.style.maxWidth = '900px';
+                return;
+            }
+
+            const availW = Math.max(300, Math.min(920, mainEl.clientWidth - 80));
+            const availH = Math.max(320, mainEl.clientHeight - 120);
+
+            let boxW = availW;
+            let boxH = boxW / ratioDef.ratio;
+            if (boxH > availH) {
+                boxH = availH;
+                boxW = boxH * ratioDef.ratio;
+            }
+
+            stage.style.maxWidth = 'none';
+            stage.style.width = Math.round(boxW) + 'px';
+            stage.style.height = Math.round(boxH) + 'px';
         }
 
         /* --- Palettes harmonisées --- */
@@ -1177,19 +1497,19 @@
         /* --- Gestion des séries --- */
         function renderSeriesList() {
             const container = document.getElementById('seriesList');
-            const hint = document.getElementById('donutHint');
+            const hint = document.getElementById('circularHint');
             const addBtn = document.getElementById('addSeriesBtn');
-            const isDonut = state.chartType === 'donut';
+            const isCirc = isCircularType(state.chartType);
 
-            hint.style.display = isDonut ? 'block' : 'none';
-            addBtn.style.display = isDonut ? 'none' : 'block';
+            hint.style.display = isCirc ? 'block' : 'none';
+            addBtn.style.display = isCirc ? 'none' : 'block';
 
             container.innerHTML = '';
-            const visibleSeries = isDonut ? [state.series[0]] : state.series;
+            const visibleSeries = isCirc ? [state.series[0]] : state.series;
 
             visibleSeries.forEach((series, sIdx) => {
                 const row = document.createElement('div');
-                const canRemove = !isDonut && state.series.length > 1;
+                const canRemove = !isCirc && state.series.length > 1;
                 row.className = 'series-row' + (canRemove ? '' : ' single-series');
 
                 const colorInput = document.createElement('input');
@@ -1259,14 +1579,42 @@
             updateUI(true);
         }
 
+        /* --- Tri des données (Croissant / Décroissant) --- */
+        function updateSortButtonsUI() {
+            document.getElementById('sortAscBtn').classList.toggle('active', lastSortDir === 'asc');
+            document.getElementById('sortDescBtn').classList.toggle('active', lastSortDir === 'desc');
+        }
+
+        function sortRows(direction) {
+            const mult = direction === 'asc' ? 1 : -1;
+            const useSum = !isCircularType(state.chartType) && state.series.length > 1 && state.stacked;
+
+            state.rows.sort((a, b) => {
+                const va = useSum
+                    ? a.values.reduce((acc, n) => acc + (Number(n) || 0), 0)
+                    : (Number(a.values[0]) || 0);
+                const vb = useSum
+                    ? b.values.reduce((acc, n) => acc + (Number(n) || 0), 0)
+                    : (Number(b.values[0]) || 0);
+                return (va - vb) * mult;
+            });
+
+            lastSortDir = direction;
+            updateSortButtonsUI();
+            renderDataList();
+            updateUI(false);
+            showToast(direction === 'asc' ? 'Données triées par ordre croissant' : 'Données triées par ordre décroissant');
+        }
+
         /* --- Gestion des données --- */
         function renderDataList() {
             const container = document.getElementById('dataList');
             container.innerHTML = '';
 
-            const isDonut = state.chartType === 'donut';
-            const isMultiSeries = !isDonut && state.series.length > 1;
-            const showRowColorPicker = isDonut || (state.chartType === 'bar' && state.series.length === 1);
+            const isCirc = isCircularType(state.chartType);
+            const isBarType = (state.chartType === 'bar' || state.chartType === 'bar-horizontal');
+            const isMultiSeries = !isCirc && state.series.length > 1;
+            const showRowColorPicker = isCirc || (isBarType && state.series.length === 1);
 
             state.rows.forEach((rowData, rIdx) => {
                 const rowEl = document.createElement('div');
@@ -1338,6 +1686,8 @@
                         valInput.value = rowData.values[sIdx] ?? 0;
                         valInput.oninput = (e) => {
                             state.rows[rIdx].values[sIdx] = Number(e.target.value) || 0;
+                            lastSortDir = null;
+                            updateSortButtonsUI();
                             updateUI(false);
                         };
 
@@ -1382,6 +1732,8 @@
                     valInput.value = rowData.values[0] ?? 0;
                     valInput.oninput = (e) => {
                         state.rows[rIdx].values[0] = Number(e.target.value) || 0;
+                        lastSortDir = null;
+                        updateSortButtonsUI();
                         updateUI(false);
                     };
 
@@ -1424,6 +1776,8 @@
                 color: cols[nextIdx % cols.length],
                 hidden: false
             });
+            lastSortDir = null;
+            updateSortButtonsUI();
             renderDataList();
             updateUI(false);
         }
@@ -1434,19 +1788,65 @@
             updateUI(false);
         }
 
-        /* --- Calcul de la hauteur plein écran (>= 90% disponible) --- */
-        function getChartHeight() {
-            if (getFullscreenElement()) {
-                const chartEl = document.getElementById('mainChart');
-                if (chartEl && chartEl.clientHeight > 200) {
-                    return Math.floor(chartEl.clientHeight);
-                }
-                const titleEl = document.getElementById('displayTitle');
-                const hasTitle = titleEl && titleEl.style.display !== 'none' && titleEl.textContent.trim() !== '';
-                const titleHeight = hasTitle ? (titleEl.offsetHeight + 16) : 0;
-                const verticalChrome = (window.innerHeight * 0.02) + 52;
-                return Math.max(320, Math.floor(window.innerHeight - verticalChrome - titleHeight));
+        /* --- Calculs statistiques : Régression linéaire & Moyenne --- */
+        function computeLinearTrend(ys) {
+            const n = ys.length;
+            if (n < 2) return ys.slice();
+            let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+            for (let i = 0; i < n; i++) {
+                sumX += i;
+                sumY += ys[i];
+                sumXY += i * ys[i];
+                sumXX += i * i;
             }
+            const denom = n * sumXX - sumX * sumX;
+            if (denom === 0) return ys.slice();
+            const slope = (n * sumXY - sumX * sumY) / denom;
+            const intercept = (sumY - slope * sumX) / n;
+            return ys.map((_, i) => Number((intercept + slope * i).toFixed(2)));
+        }
+
+        function computeAverage(visibleRows) {
+            if (!visibleRows.length) return null;
+            const isCirc = isCircularType(state.chartType);
+            if (isCirc || state.series.length === 1) {
+                const nums = visibleRows.map(r => Number(r.values[0]) || 0);
+                return nums.reduce((a, b) => a + b, 0) / nums.length;
+            }
+            if (state.stacked && (state.chartType === 'bar' || state.chartType === 'bar-horizontal' || state.chartType === 'area')) {
+                const totals = visibleRows.map(r => r.values.reduce((acc, n) => acc + (Number(n) || 0), 0));
+                return totals.reduce((a, b) => a + b, 0) / totals.length;
+            }
+            const all = [];
+            visibleRows.forEach(r => {
+                for (let i = 0; i < state.series.length; i++) {
+                    all.push(Number(r.values[i]) || 0);
+                }
+            });
+            return all.length ? all.reduce((a, b) => a + b, 0) / all.length : null;
+        }
+
+        /* --- Hauteur dynamique (Plein écran, Ratio fixe, ou Auto) --- */
+        function getChartHeight() {
+            const titleEl = document.getElementById('displayTitle');
+            const avgEl = document.getElementById('avgBadge');
+            const hasTitle = titleEl && titleEl.style.display !== 'none' && titleEl.textContent.trim() !== '';
+            const hasAvgBadge = avgEl && avgEl.style.display !== 'none';
+            const titleHeight = hasTitle ? (titleEl.offsetHeight + 20) : 0;
+            const avgHeight = hasAvgBadge ? (avgEl.offsetHeight + 12) : 0;
+
+            if (getFullscreenElement()) {
+                const verticalChrome = (window.innerHeight * 0.02) + 52;
+                return Math.max(320, Math.floor(window.innerHeight - verticalChrome - titleHeight - avgHeight));
+            }
+
+            if (state.aspectRatio !== 'auto') {
+                const stage = document.getElementById('exportStage');
+                const stageH = stage.clientHeight || 480;
+                const containerPadding = 94; // 2.5rem haut + 3.4rem bas
+                return Math.max(200, Math.floor(stageH - containerPadding - titleHeight - avgHeight));
+            }
+
             return 420;
         }
 
@@ -1457,12 +1857,25 @@
             const rowColors = visibleRows.map(r => r.color);
             const type = state.chartType;
 
-            const isCircular = (type === 'donut');
-            const isLineOrArea = (type === 'line' || type === 'area');
-            const isMultiSeries = !isCircular && state.series.length > 1;
-            const isSingleSeriesBar = (type === 'bar' && state.series.length === 1);
+            const isCirc = isCircularType(type);
+            const isHorizontalBar = (type === 'bar-horizontal');
+            const isVerticalBar = (type === 'bar');
+            const isBar = isVerticalBar || isHorizontalBar;
+            const isLine = (type === 'line' || type === 'step');
+            const isArea = (type === 'area');
+            const isScatter = (type === 'scatter');
+            const isRadar = (type === 'radar');
+            const isRadialBar = (type === 'radialBar');
+            const isMultiSeries = !isCirc && state.series.length > 1;
+            const isSingleSeriesBar = isBar && state.series.length === 1;
+
+            const canStack = state.stacked && isMultiSeries && (isBar || isArea);
+            const canTrendline = state.showTrendline && TRENDLINE_TYPES.includes(type) && !canStack && visibleRows.length >= 2;
+            const avgValue = state.showAverage ? computeAverage(visibleRows) : null;
 
             const seriesColors = state.series.map(s => s.color);
+            const trendColor = isDarkMode ? '#fb7185' : '#e11d48';
+            const avgColor = isDarkMode ? '#38bdf8' : '#0284c7';
             const textColor = isDarkMode ? '#a1a1aa' : '#52525b';
             const strongTextColor = isDarkMode ? '#f4f4f5' : '#18181b';
             const cardBg = isDarkMode ? '#121216' : '#ffffff';
@@ -1473,12 +1886,27 @@
                 return Number.isFinite(num) ? num.toFixed(2) : '0.00';
             };
 
+            // Type interne ApexCharts
+            let apexChartType = type;
+            if (isHorizontalBar) apexChartType = 'bar';
+            if (type === 'step') apexChartType = 'line';
+            if (canTrendline) apexChartType = 'line'; // Mode mixte propre pour combiner bar/area/scatter + trendline
+
+            // Valeurs radialBar normalisées sur 0-100 tout en affichant les vraies valeurs
+            const rawRadialValues = visibleRows.map(r => Math.max(0, Number(r.values[0]) || 0));
+            const maxRadialVal = Math.max(...rawRadialValues, 0);
+            const radialScaleMax = maxRadialVal > 100 ? maxRadialVal * 1.12 : 100;
+
+            // Construction des séries
             let apexSeries;
-            if (isCircular) {
+            if (isRadialBar) {
+                apexSeries = rawRadialValues.map(v => Number(((v / radialScaleMax) * 100).toFixed(1)));
+            } else if (isCirc) {
                 apexSeries = visibleRows.map(r => Number(r.values[0]) || 0);
             } else if (isSingleSeriesBar) {
                 apexSeries = [{
                     name: state.series[0].name || 'Valeur',
+                    ...(canTrendline ? { type: 'column' } : {}),
                     data: visibleRows.map(r => ({
                         x: r.label,
                         y: Number(r.values[0]) || 0,
@@ -1486,37 +1914,86 @@
                     }))
                 }];
             } else {
+                const mixedSeriesType = isVerticalBar ? 'column' : (isArea ? 'area' : (isScatter ? 'scatter' : 'line'));
                 apexSeries = state.series.map((s, sIdx) => ({
                     name: s.name || `Série ${sIdx + 1}`,
+                    ...(canTrendline ? { type: mixedSeriesType } : {}),
                     data: visibleRows.map(r => Number(r.values[sIdx]) || 0)
                 }));
             }
 
+            // Ajout de la courbe de tendance (régression linéaire)
+            if (canTrendline) {
+                const baseYs = visibleRows.map(r => {
+                    if (state.series.length === 1) return Number(r.values[0]) || 0;
+                    const sum = r.values.reduce((acc, v) => acc + (Number(v) || 0), 0);
+                    return sum / state.series.length;
+                });
+                const trendYs = computeLinearTrend(baseYs);
+                apexSeries.push({
+                    name: 'Tendance',
+                    type: 'line',
+                    data: isSingleSeriesBar
+                        ? visibleRows.map((r, idx) => ({ x: r.label, y: trendYs[idx] }))
+                        : trendYs
+                });
+            }
+
+            const dataSeriesCount = isCirc ? 0 : state.series.length;
+            const colorsList = isCirc
+                ? rowColors
+                : (canTrendline ? [...seriesColors, trendColor] : seriesColors);
+
+            // Stroke configuration
             let strokeOptions;
-            if (isLineOrArea) {
+            if (canTrendline) {
+                const dataWidth = (isVerticalBar || isScatter) ? 0 : 3;
+                const dataCurve = type === 'step' ? 'stepline' : 'smooth';
                 strokeOptions = {
                     show: true,
-                    curve: 'smooth',
+                    width: [...Array(dataSeriesCount).fill(dataWidth), 2.5],
+                    dashArray: [...Array(dataSeriesCount).fill(0), 6],
+                    curve: [...Array(dataSeriesCount).fill(dataCurve), 'straight'],
+                    lineCap: 'round',
+                    colors: colorsList
+                };
+            } else if (isLine || isArea) {
+                strokeOptions = {
+                    show: true,
+                    curve: type === 'step' ? 'stepline' : 'smooth',
                     width: 3,
                     lineCap: 'round',
                     colors: seriesColors
                 };
-            } else if (isCircular) {
+            } else if (isRadar) {
                 strokeOptions = {
-                    show: state.showBorders,
-                    width: state.showBorders ? 3 : 0,
-                    colors: [state.transparentBg ? 'transparent' : cardBg]
+                    show: true,
+                    width: 2.5,
+                    colors: seriesColors
                 };
+            } else if (isScatter) {
+                strokeOptions = { show: false, width: 0 };
+            } else if (isCirc) {
+                strokeOptions = { show: false, width: 0 };
             } else {
-                strokeOptions = {
-                    show: state.showBorders,
-                    width: state.showBorders ? 2 : 0,
-                    colors: [isDarkMode ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.35)']
-                };
+                strokeOptions = { show: false, width: 0 };
             }
 
-            const fillOptions = (type === 'area')
-                ? {
+            // Fill configuration
+            let fillOptions;
+            if (isArea && canTrendline) {
+                fillOptions = {
+                    type: [...Array(dataSeriesCount).fill('gradient'), 'solid'],
+                    opacity: [...Array(dataSeriesCount).fill(1), 1],
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: isDarkMode ? 0.32 : 0.26,
+                        opacityTo: 0.02,
+                        stops: [0, 95, 100]
+                    }
+                };
+            } else if (isArea) {
+                fillOptions = {
                     type: 'gradient',
                     gradient: {
                         shadeIntensity: 1,
@@ -1524,48 +2001,89 @@
                         opacityTo: 0.02,
                         stops: [0, 95, 100]
                     }
-                }
-                : { type: 'solid', opacity: 1 };
+                };
+            } else if (isRadar) {
+                fillOptions = { opacity: isDarkMode ? 0.28 : 0.2 };
+            } else if (type === 'polarArea') {
+                fillOptions = { opacity: 0.88 };
+            } else {
+                fillOptions = { type: 'solid', opacity: 1 };
+            }
 
-            const markersOptions = isLineOrArea
-                ? {
+            // Markers configuration
+            let markersOptions;
+            if (canTrendline) {
+                const dataSize = isVerticalBar ? 0 : (isScatter ? 7 : 5);
+                markersOptions = {
+                    size: [...Array(dataSeriesCount).fill(dataSize), 0],
+                    strokeWidth: 2,
+                    strokeColors: cardBg,
+                    hover: { sizeOffset: 2 }
+                };
+            } else if (isScatter) {
+                markersOptions = {
+                    size: 7,
+                    strokeWidth: 2,
+                    strokeColors: cardBg,
+                    hover: { size: 9 }
+                };
+            } else if (isLine || isArea || isRadar) {
+                markersOptions = {
                     size: 5,
                     strokeWidth: 2,
                     strokeColors: cardBg,
                     hover: { size: 7 }
+                };
+            } else {
+                markersOptions = { size: 0 };
+            }
+
+            // Annotations pour la ligne de moyenne (cartésien vertical & horizontal)
+            const annotations = { yaxis: [], xaxis: [] };
+            if (avgValue !== null && !isCirc && !isRadar) {
+                const avgConfig = {
+                    borderColor: avgColor,
+                    strokeDashArray: 5,
+                    borderWidth: 2,
+                    label: {
+                        borderColor: avgColor,
+                        style: {
+                            color: '#ffffff',
+                            background: avgColor,
+                            fontSize: '11px',
+                            fontWeight: 700,
+                            fontFamily: 'Inter, sans-serif',
+                            padding: { left: 8, right: 8, top: 3, bottom: 3 }
+                        },
+                        text: `Moyenne : ${formatDecimals(avgValue)}`
+                    }
+                };
+                if (isHorizontalBar) {
+                    annotations.xaxis.push({
+                        x: avgValue,
+                        ...avgConfig,
+                        label: { ...avgConfig.label, orientation: 'horizontal', offsetY: -6 }
+                    });
+                } else {
+                    annotations.yaxis.push({
+                        y: avgValue,
+                        ...avgConfig,
+                        label: { ...avgConfig.label, position: 'right', offsetX: -8, offsetY: -4 }
+                    });
                 }
-                : { size: 0 };
+            }
 
-            const canStack = state.stacked && isMultiSeries && (type === 'bar' || type === 'area');
-
-            return {
-                chart: {
-                    type: type,
-                    width: '100%',
-                    height: getChartHeight(),
-                    stacked: canStack,
-                    background: 'transparent',
-                    foreColor: textColor,
-                    toolbar: { show: false },
-                    zoom: { enabled: false },
-                    fontFamily: 'Inter, sans-serif',
-                    animations: { enabled: animate, speed: 350 },
-                    // Ombre gérée en CSS (.has-shadows) pour éviter le bug SVG <filter> en plein écran
-                    dropShadow: { enabled: false }
-                },
-                theme: { mode: isDarkMode ? 'dark' : 'light' },
-                colors: isCircular ? rowColors : seriesColors,
-                labels: labels,
-                series: apexSeries,
-                stroke: strokeOptions,
-                fill: fillOptions,
-                markers: markersOptions,
-                grid: {
-                    borderColor: gridColor,
-                    strokeDashArray: 4,
-                    padding: { top: 10, right: 16, bottom: 10, left: 10 }
-                },
-                xaxis: isSingleSeriesBar
+            // Axes X / Y (inversion propre pour les barres horizontales)
+            const xaxisOptions = isHorizontalBar
+                ? {
+                    axisBorder: { color: gridColor },
+                    axisTicks: { color: gridColor },
+                    labels: {
+                        formatter: formatDecimals,
+                        style: { colors: textColor, fontSize: '12px' }
+                    }
+                }
+                : (isSingleSeriesBar
                     ? {
                         type: 'category',
                         axisBorder: { color: gridColor },
@@ -1577,18 +2095,62 @@
                         axisBorder: { color: gridColor },
                         axisTicks: { color: gridColor },
                         labels: { style: { colors: textColor, fontSize: '12px' } }
-                    },
-                yaxis: {
+                    });
+
+            const yaxisOptions = isHorizontalBar
+                ? {
+                    labels: { style: { colors: textColor, fontSize: '12px' } }
+                }
+                : {
                     labels: {
                         formatter: formatDecimals,
                         style: { colors: textColor, fontSize: '12px' }
                     }
+                };
+
+            // DataLabels (ne pas encombrer la courbe de tendance)
+            const enabledOnSeries = canTrendline
+                ? Array.from({ length: dataSeriesCount }, (_, i) => i)
+                : undefined;
+
+            return {
+                chart: {
+                    type: apexChartType,
+                    width: '100%',
+                    height: getChartHeight(),
+                    stacked: canStack,
+                    background: 'transparent',
+                    foreColor: textColor,
+                    toolbar: { show: false },
+                    zoom: { enabled: false },
+                    fontFamily: 'Inter, sans-serif',
+                    animations: { enabled: animate, speed: 350 },
+                    dropShadow: { enabled: false }
                 },
+                theme: { mode: isDarkMode ? 'dark' : 'light' },
+                colors: colorsList,
+                labels: labels,
+                series: apexSeries,
+                stroke: strokeOptions,
+                fill: fillOptions,
+                markers: markersOptions,
+                annotations: annotations,
+                grid: {
+                    borderColor: gridColor,
+                    strokeDashArray: 4,
+                    padding: { top: 10, right: 16, bottom: 10, left: 10 }
+                },
+                xaxis: xaxisOptions,
+                yaxis: yaxisOptions,
                 tooltip: {
                     theme: isDarkMode ? 'dark' : 'light',
-                    shared: isMultiSeries && !isCircular,
-                    intersect: false,
-                    y: { formatter: formatDecimals }
+                    shared: (isMultiSeries || canTrendline) && !isCirc && !isScatter && !isRadar,
+                    intersect: isScatter,
+                    y: {
+                        formatter: isRadialBar
+                            ? (_, opts) => formatDecimals(rawRadialValues[opts.seriesIndex] ?? 0)
+                            : formatDecimals
+                    }
                 },
                 legend: {
                     show: state.showLegend,
@@ -1601,21 +2163,29 @@
                 },
                 dataLabels: {
                     enabled: state.showLabels,
-                    formatter: isCircular ? (val => Number(val).toFixed(1) + '%') : formatDecimals,
-                    offsetY: isLineOrArea ? -10 : (type === 'bar' && !canStack ? -20 : 0),
+                    enabledOnSeries: enabledOnSeries,
+                    formatter: (val, opts) => {
+                        if (type === 'donut' || type === 'pie') return Number(val).toFixed(1) + '%';
+                        if (isRadialBar) return formatDecimals(rawRadialValues[opts.seriesIndex] ?? 0);
+                        return formatDecimals(val);
+                    },
+                    offsetX: isHorizontalBar && !canStack ? 26 : 0,
+                    offsetY: (isLine || isArea || isScatter) ? -10 : (isVerticalBar && !canStack ? -20 : 0),
                     style: {
                         fontSize: '12px',
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 600,
-                        colors: (isCircular || canStack) ? ['#ffffff'] : [strongTextColor]
+                        colors: (isCirc || canStack) ? ['#ffffff'] : [strongTextColor]
                     },
                     background: { enabled: false },
                     dropShadow: { enabled: false }
                 },
-                MyPlotOptions: {
+                plotOptions: {
                     bar: {
+                        horizontal: isHorizontalBar,
                         borderRadius: canStack ? 3 : 6,
                         columnWidth: isMultiSeries ? '60%' : '45%',
+                        barHeight: isMultiSeries ? '66%' : '52%',
                         dataLabels: { position: canStack ? 'center' : 'top' },
                         distributed: false
                     },
@@ -1623,12 +2193,8 @@
                         donut: {
                             size: '70%',
                             labels: {
-                                show: true,
-                                name: {
-                                    show: true,
-                                    color: textColor,
-                                    fontSize: '13px'
-                                },
+                                show: type === 'donut',
+                                name: { show: true, color: textColor, fontSize: '13px' },
                                 value: {
                                     show: true,
                                     color: strongTextColor,
@@ -1649,32 +2215,51 @@
                                 }
                             }
                         }
+                    },
+                    polarArea: {
+                        rings: { strokeWidth: 1, strokeColor: gridColor },
+                        spokes: { strokeWidth: 1, connectorColors: gridColor }
+                    },
+                    radar: {
+                        polygons: {
+                            strokeColors: gridColor,
+                            connectorColors: gridColor,
+                            fill: { colors: ['transparent'] }
+                        }
+                    },
+                    radialBar: {
+                        hollow: { size: '32%' },
+                        track: {
+                            background: isDarkMode ? 'rgba(255,255,255,0.08)' : '#f1f5f9',
+                            strokeWidth: '100%'
+                        },
+                        dataLabels: {
+                            name: { show: true, fontSize: '13px', color: textColor },
+                            value: {
+                                show: true,
+                                fontSize: '18px',
+                                fontWeight: 700,
+                                color: strongTextColor,
+                                formatter: (pct) => {
+                                    const approx = (Number(pct) / 100) * radialScaleMax;
+                                    return formatDecimals(approx);
+                                }
+                            },
+                            total: {
+                                show: true,
+                                label: state.series[0]?.name || 'Total',
+                                color: textColor,
+                                fontSize: '13px',
+                                fontWeight: 600,
+                                formatter: () => formatDecimals(rawRadialValues.reduce((a, b) => a + b, 0))
+                            }
+                        }
                     }
                 }
             };
         }
 
-        function renderChart(animate = true) {
-            const options = buildChartOptions(animate);
-            currentChartType = options.chart.type;
-            if (chart) {
-                chart.destroy();
-                chart = null;
-            }
-            const container = document.querySelector('#mainChart');
-            container.innerHTML = '';
-            chart = new ApexCharts(container, options);
-            chart.render();
-        }
-
-        function scheduleCleanRerender(delay = 120) {
-            clearTimeout(resizeRenderTimer);
-            resizeRenderTimer = setTimeout(() => {
-                renderChart(false);
-            }, delay);
-        }
-
-        function updateUI(forceRecreate = false) {
+        function updateHeaderAndFooterDOM() {
             const displayTitle = document.getElementById('displayTitle');
             if (state.title.trim() !== '') {
                 displayTitle.textContent = state.title;
@@ -1693,17 +2278,64 @@
                 displaySource.style.display = 'none';
             }
 
+            // Badge moyenne pour les graphiques sans axe cartésien (circulaires & radar)
+            const avgBadge = document.getElementById('avgBadge');
+            const showNonCartesianAvg = state.showAverage && (isCircularType(state.chartType) || state.chartType === 'radar');
+            if (showNonCartesianAvg) {
+                const visibleRows = state.rows.filter(r => !r.hidden && r.label.trim() !== '');
+                const avg = computeAverage(visibleRows);
+                if (avg !== null) {
+                    avgBadge.textContent = `Moyenne : ${avg.toFixed(2)}`;
+                    avgBadge.style.display = 'inline-flex';
+                } else {
+                    avgBadge.style.display = 'none';
+                }
+            } else {
+                avgBadge.style.display = 'none';
+            }
+
             const stage = document.getElementById('exportStage');
             const captureArea = document.getElementById('captureArea');
             stage.classList.toggle('checkerboard', state.transparentBg);
             captureArea.classList.toggle('is-transparent', state.transparentBg);
             captureArea.classList.toggle('has-shadows', state.showShadows);
+        }
 
+        function getChartSignature() {
+            return `${state.chartType}|${state.showTrendline}|${state.stacked}|${state.series.length}`;
+        }
+
+        function renderChart(animate = true) {
+            updateHeaderAndFooterDOM();
+            applyAspectRatioLayout();
+            const options = buildChartOptions(animate);
+            currentChartSignature = getChartSignature();
+
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+            const container = document.querySelector('#mainChart');
+            container.innerHTML = '';
+            chart = new ApexCharts(container, options);
+            chart.render();
+        }
+
+        function scheduleCleanRerender(delay = 120) {
+            clearTimeout(resizeRenderTimer);
+            resizeRenderTimer = setTimeout(() => {
+                renderChart(false);
+            }, delay);
+        }
+
+        function updateUI(forceRecreate = false) {
+            updateHeaderAndFooterDOM();
             saveStateToStorage();
 
             if (!chart) return;
 
-            if (forceRecreate || state.chartType !== currentChartType) {
+            const sig = getChartSignature();
+            if (forceRecreate || sig !== currentChartSignature) {
                 renderChart(true);
             } else {
                 chart.updateOptions(buildChartOptions(true), true, true);
@@ -1734,7 +2366,6 @@
             btn.innerHTML = `<i data-lucide="${isFs ? 'minimize' : 'maximize'}"></i>`;
             lucide.createIcons();
 
-            // Reconstruit proprement le graphique une fois les nouvelles dimensions appliquées
             scheduleCleanRerender(120);
         }
 
@@ -1742,15 +2373,40 @@
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
         window.addEventListener('resize', () => {
-            if (getFullscreenElement()) {
+            if (getFullscreenElement() || state.aspectRatio !== 'auto') {
                 scheduleCleanRerender(140);
             }
         });
 
-        /* --- Capture haute qualité (Export HD & Presse-papier) --- */
-        function captureChartCanvas() {
+        /* --- Menu Export Multi-formats --- */
+        function toggleExportMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('exportMenu');
+            menu.classList.toggle('open');
+        }
+
+        function closeExportMenu() {
+            document.getElementById('exportMenu').classList.remove('open');
+        }
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('exportDropdown');
+            if (dropdown && !dropdown.contains(e.target)) closeExportMenu();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeExportMenu();
+        });
+
+        function getBaseFileName() {
+            const cleanTitle = state.title.trim().replace(/[^a-zA-Z0-9À-ÿ_-]+/g, '-').replace(/^-+|-+$/g, '');
+            return cleanTitle ? `Plot-${cleanTitle}` : 'Plot-Graphique';
+        }
+
+        function captureChartCanvas(forceOpaque = false) {
             const element = document.getElementById('captureArea');
-            const bgColor = state.transparentBg ? null : (isDarkMode ? '#121216' : '#ffffff');
+            const useTransparent = state.transparentBg && !forceOpaque;
+            const bgColor = useTransparent ? null : (isDarkMode ? '#121216' : '#ffffff');
             return html2canvas(element, {
                 scale: 4,
                 backgroundColor: bgColor,
@@ -1771,7 +2427,7 @@
                     throw new Error('ClipboardItem indisponible');
                 }
 
-                const blobPromise = captureChartCanvas().then(canvas =>
+                const blobPromise = captureChartCanvas(false).then(canvas =>
                     new Promise((resolve, reject) => {
                         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Blob PNG échoué')), 'image/png');
                     })
@@ -1792,31 +2448,195 @@
                 }, 1600);
             } catch (err) {
                 console.warn('Copie presse-papier impossible:', err);
-                showToast('Copie bloquée par le navigateur (ouvrez via HTTPS/localhost ou utilisez Exporter HD)', true);
+                showToast('Copie bloquée par le navigateur (utilisez Exporter)', true);
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
                 lucide.createIcons();
             }
         }
 
-        async function exportHD() {
+        function buildStandaloneSVG() {
+            const svgEl = document.querySelector('#mainChart svg.apexcharts-svg');
+            if (!svgEl) throw new Error('SVG introuvable');
+
+            const rect = svgEl.getBoundingClientRect();
+            const chartW = Math.ceil(Number(svgEl.getAttribute('width')) || rect.width || 760);
+            const chartH = Math.ceil(Number(svgEl.getAttribute('height')) || rect.height || 420);
+
+            const padX = 40;
+            const hasTitle = state.title.trim() !== '';
+            const hasAvgBadge = document.getElementById('avgBadge').style.display !== 'none';
+            const topPad = 36 + (hasTitle ? 46 : 0) + (hasAvgBadge ? 30 : 0);
+            const bottomPad = 48;
+
+            const totalW = chartW + padX * 2;
+            const totalH = chartH + topPad + bottomPad;
+
+            const bgColor = isDarkMode ? '#121216' : '#ffffff';
+            const titleColor = isDarkMode ? '#f4f4f5' : '#18181b';
+            const mutedColor = isDarkMode ? '#a1a1aa' : '#71717a';
+
+            const NS = 'http://www.w3.org/2000/svg';
+            const outer = document.createElementNS(NS, 'svg');
+            outer.setAttribute('xmlns', NS);
+            outer.setAttribute('width', String(totalW));
+            outer.setAttribute('height', String(totalH));
+            outer.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+            outer.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+
+            if (!state.transparentBg) {
+                const bg = document.createElementNS(NS, 'rect');
+                bg.setAttribute('width', String(totalW));
+                bg.setAttribute('height', String(totalH));
+                bg.setAttribute('rx', '24');
+                bg.setAttribute('fill', bgColor);
+                outer.appendChild(bg);
+            }
+
+            if (hasTitle) {
+                const titleNode = document.createElementNS(NS, 'text');
+                titleNode.setAttribute('x', String(totalW / 2));
+                titleNode.setAttribute('y', '52');
+                titleNode.setAttribute('text-anchor', 'middle');
+                titleNode.setAttribute('fill', titleColor);
+                titleNode.setAttribute('font-size', '22');
+                titleNode.setAttribute('font-weight', '700');
+                titleNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
+                titleNode.textContent = state.title.trim();
+                outer.appendChild(titleNode);
+            }
+
+            if (hasAvgBadge) {
+                const avgNode = document.createElementNS(NS, 'text');
+                avgNode.setAttribute('x', String(totalW / 2));
+                avgNode.setAttribute('y', hasTitle ? '82' : '50');
+                avgNode.setAttribute('text-anchor', 'middle');
+                avgNode.setAttribute('fill', isDarkMode ? '#38bdf8' : '#0284c7');
+                avgNode.setAttribute('font-size', '13');
+                avgNode.setAttribute('font-weight', '600');
+                avgNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
+                avgNode.textContent = document.getElementById('avgBadge').textContent;
+                outer.appendChild(avgNode);
+            }
+
+            const cloned = svgEl.cloneNode(true);
+            cloned.setAttribute('x', String(padX));
+            cloned.setAttribute('y', String(topPad));
+            cloned.setAttribute('width', String(chartW));
+            cloned.setAttribute('height', String(chartH));
+            outer.appendChild(cloned);
+
+            if (state.source.trim() !== '') {
+                const srcNode = document.createElementNS(NS, 'text');
+                srcNode.setAttribute('x', '24');
+                srcNode.setAttribute('y', String(totalH - 18));
+                srcNode.setAttribute('fill', mutedColor);
+                srcNode.setAttribute('font-size', '12');
+                srcNode.setAttribute('font-weight', '500');
+                srcNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
+                srcNode.textContent = state.source.trim();
+                outer.appendChild(srcNode);
+            }
+
+            const brandNode = document.createElementNS(NS, 'text');
+            brandNode.setAttribute('x', String(totalW - 24));
+            brandNode.setAttribute('y', String(totalH - 18));
+            brandNode.setAttribute('text-anchor', 'end');
+            brandNode.setAttribute('fill', mutedColor);
+            brandNode.setAttribute('font-size', '11');
+            brandNode.setAttribute('font-weight', '700');
+            brandNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
+            brandNode.textContent = 'MADE WITH PLOT';
+            outer.appendChild(brandNode);
+
+            return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(outer);
+        }
+
+        function exportCSV() {
+            const visibleRows = state.rows.filter(r => !r.hidden && r.label.trim() !== '');
+            const isCirc = isCircularType(state.chartType);
+            const activeSeries = isCirc ? [state.series[0]] : state.series;
+
+            const escapeCell = (val) => {
+                const str = String(val ?? '');
+                return /[",;\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+            };
+
+            const header = ['Catégorie', ...activeSeries.map(s => s.name || 'Valeur')].map(escapeCell).join(',');
+            const lines = visibleRows.map(r => [
+                r.label,
+                ...activeSeries.map((_, idx) => Number(r.values[idx]) || 0)
+            ].map(escapeCell).join(','));
+
+            const csvContent = '\uFEFF' + [header, ...lines].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            triggerBlobDownload(blob, `${getBaseFileName()}.csv`);
+        }
+
+        function triggerBlobDownload(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        async function exportFile(format) {
+            closeExportMenu();
+
             const btn = document.getElementById('downloadBtn');
             const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Génération...';
+            btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Export...';
             btn.disabled = true;
             lucide.createIcons();
 
             try {
-                const canvas = await captureChartCanvas();
-                const link = document.createElement('a');
-                const cleanTitle = state.title.trim().replace(/\s+/g, '-');
-                link.download = cleanTitle ? `MyPlot-${cleanTitle}.png` : 'MyPlot-Graphique-HD.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                showToast('Image HD exportée !');
+                const baseName = getBaseFileName();
+
+                if (format === 'csv') {
+                    exportCSV();
+                    showToast('Données CSV exportées !');
+                } else if (format === 'svg') {
+                    const svgString = buildStandaloneSVG();
+                    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                    triggerBlobDownload(blob, `${baseName}.svg`);
+                    showToast('Fichier vectoriel SVG exporté !');
+                } else if (format === 'pdf') {
+                    const canvas = await captureChartCanvas(true);
+                    const { jsPDF } = window.jspdf;
+                    const pdfW = Math.round(canvas.width / 2);
+                    const pdfH = Math.round(canvas.height / 2);
+                    const orientation = pdfW >= pdfH ? 'landscape' : 'portrait';
+                    const pdf = new jsPDF({ orientation, unit: 'px', format: [pdfW, pdfH] });
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdfW, pdfH);
+                    pdf.save(`${baseName}.pdf`);
+                    showToast('Document PDF HD exporté !');
+                } else if (format === 'jpeg') {
+                    const canvas = await captureChartCanvas(true);
+                    const link = document.createElement('a');
+                    link.download = `${baseName}.jpeg`;
+                    link.href = canvas.toDataURL('image/jpeg', 0.95);
+                    link.click();
+                    showToast('Image JPEG HD exportée !');
+                } else if (format === 'webp') {
+                    const canvas = await captureChartCanvas(false);
+                    const link = document.createElement('a');
+                    link.download = `${baseName}.webp`;
+                    link.href = canvas.toDataURL('image/webp', 0.95);
+                    link.click();
+                    showToast('Image WebP HD exportée !');
+                } else {
+                    const canvas = await captureChartCanvas(false);
+                    const link = document.createElement('a');
+                    link.download = `${baseName}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    showToast('Image PNG HD exportée !');
+                }
             } catch (err) {
                 console.error(err);
-                showToast("Erreur lors de l'export HD", true);
+                showToast(`Erreur lors de l'export ${format.toUpperCase()}`, true);
             } finally {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
@@ -1865,12 +2685,12 @@
             initTheme();
             loadInitialState();
             syncControlsFromState();
+            renderRatios();
             renderPalettes();
             renderSeriesList();
             renderDataList();
             lucide.createIcons();
             renderChart(true);
-            updateUI(false);
         }
 
         init();

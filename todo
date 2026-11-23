@@ -1,7 +1,5 @@
 - import csv, xlsx
-- plus de types de graphes
-- export en différents types de fichiers
 - AI BYOK avec graphe généré automatiquement 
-- bouton trier croissant/décroissant
-- ratios prédéfinis
-- annuler cmd Z et rétablir
+- annuler cmd Z et rétablir, cmd F
+- plus de palettes harmonisées
+- corriger pouvoir désactiver croissant et décroissant (pas d'office l'un des 2)
