@@ -16,6 +16,7 @@
             --bg: #f5f5f7;
             --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f5f5f7 100%);
             --card: #ffffff;
+            --card-subtle: #fafafa;
             --card-hover: #f4f4f5;
             --text-main: #18181b;
             --text-muted: #71717a;
@@ -30,7 +31,9 @@
             --danger-bg: #fff0f0;
             --danger-hover: #ffe5e5;
             --danger-fg: #ef4444;
-            --badge-bg: rgba(255, 255, 255, 0.85);
+            --badge-bg: rgba(255, 255, 255, 0.88);
+            --checker-a: #f4f4f5;
+            --checker-b: #e4e4e7;
             --shadow-card: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
             --shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.05);
             --shadow-primary: 0 8px 16px rgba(0, 0, 0, 0.15);
@@ -45,11 +48,12 @@
             --bg: #09090b;
             --bg-gradient: radial-gradient(circle at 50% 0%, #17171c 0%, #09090b 100%);
             --card: #121216;
+            --card-subtle: #18181d;
             --card-hover: #1e1e24;
             --text-main: #f4f4f5;
             --text-muted: #a1a1aa;
             --border: rgba(255, 255, 255, 0.09);
-            --border-strong: rgba(255, 255, 255, 0.18);
+            --border-strong: rgba(255, 255, 255, 0.2);
             --input-bg: #18181d;
             --input-focus-bg: #1f1f26;
             --input-focus-ring: rgba(255, 255, 255, 0.08);
@@ -59,7 +63,9 @@
             --danger-bg: rgba(239, 68, 68, 0.12);
             --danger-hover: rgba(239, 68, 68, 0.22);
             --danger-fg: #f87171;
-            --badge-bg: rgba(24, 24, 29, 0.85);
+            --badge-bg: rgba(24, 24, 29, 0.88);
+            --checker-a: #18181d;
+            --checker-b: #24242c;
             --shadow-card: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
             --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.45);
             --shadow-primary: 0 8px 20px rgba(0, 0, 0, 0.5);
@@ -99,9 +105,7 @@
             transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease;
         }
 
-        .top-bar > * {
-            pointer-events: auto;
-        }
+        .top-bar > * { pointer-events: auto; }
 
         body.sidebar-collapsed .top-bar {
             width: auto;
@@ -140,10 +144,7 @@
         }
 
         .btn-toggle-sidebar svg,
-        .btn-theme-toggle svg {
-            width: 18px;
-            height: 18px;
-        }
+        .btn-theme-toggle svg { width: 18px; height: 18px; }
 
         .app-brand {
             display: flex;
@@ -178,31 +179,58 @@
         .sidebar::-webkit-scrollbar-track { background: transparent; }
         .sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
 
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1.5rem 0 0.85rem 0;
+        }
+        .section-header:first-child { margin-top: 0.4rem; }
+
         .section-title {
             font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: var(--text-muted);
-            margin: 1.5rem 0 1rem 0;
+            margin: 0;
         }
-        .section-title:first-child { margin-top: 0.5rem; }
 
-        .input-group { margin-bottom: 1.2rem; }
+        .btn-text-subtle {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: color 0.15s, background 0.15s;
+        }
+        .btn-text-subtle:hover {
+            color: var(--text-main);
+            background: var(--card-hover);
+        }
+        .btn-text-subtle svg { width: 13px; height: 13px; }
+
+        .input-group { margin-bottom: 1rem; }
         label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.83rem;
             font-weight: 500;
-            margin-bottom: 0.55rem;
+            margin-bottom: 0.45rem;
             color: var(--text-main);
         }
 
         select, input[type="text"], input[type="number"] {
             width: 100%;
-            padding: 0.75rem 1rem;
+            padding: 0.68rem 0.9rem;
             border: 1px solid var(--border);
             border-radius: var(--radius-md);
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             background: var(--input-bg);
             color: var(--text-main);
             transition: all 0.2s ease;
@@ -211,14 +239,63 @@
             outline: none;
             border-color: var(--border-strong);
             background: var(--input-focus-bg);
-            box-shadow: 0 0 0 4px var(--input-focus-ring);
+            box-shadow: 0 0 0 3px var(--input-focus-ring);
         }
 
+        /* Palettes harmonisées */
+        .palettes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .palette-chip {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            transition: all 0.18s ease;
+            color: var(--text-main);
+        }
+        .palette-chip:hover {
+            background: var(--card-hover);
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+        }
+        .palette-chip.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--input-focus-ring);
+            background: var(--card-hover);
+        }
+        .palette-swatches {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .palette-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 1px solid rgba(128, 128, 128, 0.2);
+        }
+        .palette-name {
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Toggles */
         .toggles-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 1rem;
+            gap: 6px 10px;
+            margin-bottom: 0.5rem;
         }
         .toggle-container {
             display: flex;
@@ -226,8 +303,8 @@
             gap: 8px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 0.85rem;
-            padding: 0.45rem 0;
+            font-size: 0.83rem;
+            padding: 0.35rem 0;
             margin-bottom: 0;
             color: var(--text-main);
         }
@@ -238,30 +315,114 @@
             cursor: pointer;
         }
 
-        .data-row {
-            display: grid;
-            grid-template-columns: 36px 1fr 90px 32px 36px;
+        /* Séries */
+        .series-list {
+            display: flex;
+            flex-direction: column;
             gap: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .series-row {
+            display: grid;
+            grid-template-columns: 34px 1fr 34px;
+            gap: 8px;
             align-items: center;
         }
+        .series-row.single-series {
+            grid-template-columns: 34px 1fr;
+        }
+
+        .donut-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: var(--card-subtle);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 0.7rem;
+            margin-bottom: 0.65rem;
+            display: none;
+        }
+
+        /* Lignes de données */
+        .data-row {
+            display: grid;
+            grid-template-columns: 34px 1fr 86px 26px 34px;
+            gap: 7px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        .data-row.no-row-color {
+            grid-template-columns: 1fr 86px 26px 34px;
+        }
+        .data-row.multi-series-row {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--card-subtle);
+            margin-bottom: 10px;
+        }
+        .data-row-top {
+            display: grid;
+            grid-template-columns: 1fr 26px 34px;
+            gap: 7px;
+            align-items: center;
+            width: 100%;
+        }
+        .data-row-values {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 7px;
+            width: 100%;
+        }
+        .series-val-field {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .series-val-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .series-val-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .series-val-field input[type="number"] {
+            padding: 0.5rem 0.65rem;
+            font-size: 0.84rem;
+        }
+
         .data-row.hidden-row { opacity: 0.45; filter: grayscale(0.5); }
 
         input[type="color"] {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             padding: 0;
             border: 1px solid var(--border);
             border-radius: 8px;
             cursor: pointer;
             background: var(--input-bg);
+            flex-shrink: 0;
         }
         input[type="color"]::-webkit-color-swatch-wrapper { padding: 3px; }
         input[type="color"]::-webkit-color-swatch { border-radius: 5px; border: none; }
 
         .hide-checkbox {
-            width: 18px;
-            height: 18px;
+            width: 17px;
+            height: 17px;
             cursor: pointer;
             justify-self: center;
             accent-color: var(--primary);
@@ -270,13 +431,14 @@
         .btn-add {
             background: var(--add-bg);
             border: 1px dashed var(--add-border);
-            padding: 0.8rem;
+            padding: 0.68rem;
             border-radius: var(--radius-md);
             cursor: pointer;
             width: 100%;
+            font-size: 0.85rem;
             font-weight: 500;
             color: var(--text-main);
-            margin-top: 0.5rem;
+            margin-top: 0.35rem;
             transition: all 0.2s;
         }
         .btn-add:hover { background: var(--add-hover); }
@@ -285,7 +447,8 @@
             background: var(--danger-bg);
             color: var(--danger-fg);
             border: none;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 8px;
             cursor: pointer;
             display: flex;
@@ -309,16 +472,39 @@
             transition: background 0.25s ease;
         }
 
-        .export-container {
-            background: var(--card);
-            padding: 3rem 3rem 4rem 3rem;
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-card);
+        /* Stage wrapper : affiche le damier de transparence sans qu'il soit capturé par html2canvas */
+        .export-stage {
             width: 100%;
             max-width: 900px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
             border: 1px solid var(--border);
-            position: relative;
+            overflow: hidden;
+            background: var(--card);
             transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .export-stage.checkerboard {
+            background-color: var(--checker-a);
+            background-image:
+                linear-gradient(45deg, var(--checker-b) 25%, transparent 25%),
+                linear-gradient(-45deg, var(--checker-b) 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, var(--checker-b) 75%),
+                linear-gradient(-45deg, transparent 75%, var(--checker-b) 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .export-container {
+            background: var(--card);
+            padding: 2.75rem 2.75rem 3.75rem 2.75rem;
+            width: 100%;
+            position: relative;
+            transition: background-color 0.25s ease;
+        }
+
+        .export-container.is-transparent {
+            background: transparent;
         }
 
         .export-title {
@@ -328,15 +514,32 @@
             letter-spacing: -0.02em;
             color: var(--text-main);
             margin-top: 0;
-            margin-bottom: 2rem;
+            margin-bottom: 1.75rem;
             display: none;
         }
 
-        #mainChart {
-            width: 100%;
+        #mainChart { width: 100%; }
+
+        /* Source (bas à gauche, en symétrie exacte avec Made with Plot) */
+        .chart-source {
+            position: absolute;
+            bottom: 14px;
+            left: 16px;
+            display: none;
+            align-items: center;
+            height: 26px;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            max-width: calc(100% - 175px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 30;
+            user-select: none;
         }
 
-        /* Badge Made With Plot */
+        /* Badge Made With Plot (bas à droite) */
         .made-with-plot {
             position: absolute;
             bottom: 14px;
@@ -344,12 +547,12 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            height: 26px;
             font-size: 0.7rem;
             font-weight: 700;
             color: var(--text-muted);
             background: var(--badge-bg);
-            backdrop-filter: blur(10px);
-            padding: 5px 10px;
+            padding: 0 10px;
             border-radius: 20px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow-btn);
@@ -382,10 +585,10 @@
             background: var(--primary);
             color: var(--primary-fg);
             border: none;
-            padding: 0.75rem 1.4rem;
+            padding: 0 1.3rem;
             height: 40px;
             border-radius: 100px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
@@ -395,7 +598,32 @@
             box-shadow: var(--shadow-primary);
         }
         .btn-download:hover { transform: translateY(-2px); opacity: 0.92; }
+        .btn-download:disabled { opacity: 0.65; cursor: wait; transform: none; }
         .btn-download svg { width: 16px; height: 16px; }
+
+        .btn-secondary {
+            background: var(--card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 0 1rem;
+            height: 40px;
+            border-radius: 100px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-btn);
+        }
+        .btn-secondary:hover {
+            background: var(--card-hover);
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+        }
+        .btn-secondary:disabled { opacity: 0.65; cursor: wait; transform: none; }
+        .btn-secondary svg { width: 15px; height: 15px; }
 
         .btn-icon {
             background: var(--card);
@@ -423,7 +651,7 @@
             border-color: var(--primary);
         }
 
-        /* Bouton de sortie discret visible uniquement en plein écran */
+        /* Bouton de sortie plein écran */
         .btn-exit-fullscreen {
             display: none;
             position: absolute;
@@ -433,9 +661,7 @@
         }
 
         /* Plein écran : >= 90% largeur et hauteur disponibles */
-        #captureArea::backdrop {
-            background: var(--card);
-        }
+        #captureArea::backdrop { background: var(--card); }
 
         #captureArea.is-fullscreen {
             position: fixed;
@@ -446,34 +672,50 @@
             border-radius: 0;
             box-shadow: none;
             border: none;
-            padding: 2vh 3vw;
+            padding: 2vh 3vw 3.25rem 3vw;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: var(--card);
+            background: var(--card) !important;
             z-index: 1000;
             overflow: hidden;
         }
 
-        #captureArea.is-fullscreen .btn-exit-fullscreen {
+        #captureArea.is-fullscreen .btn-exit-fullscreen { display: flex; }
+        #captureArea.is-fullscreen .export-title { margin-bottom: 1rem; flex-shrink: 0; }
+        #captureArea.is-fullscreen #mainChart { width: 100%; flex: 1; min-height: 0; }
+        #captureArea.is-fullscreen .made-with-plot { bottom: 1.15rem; right: 1.5rem; }
+        #captureArea.is-fullscreen .chart-source { bottom: 1.15rem; left: 1.5rem; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 1.75rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(16px);
+            background: var(--primary);
+            color: var(--primary-fg);
+            padding: 0.7rem 1.2rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 2000;
             display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        #captureArea.is-fullscreen .export-title {
-            margin-bottom: 1rem;
-            flex-shrink: 0;
+        .toast.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
-
-        #captureArea.is-fullscreen #mainChart {
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-        }
-
-        #captureArea.is-fullscreen .made-with-plot {
-            bottom: 1.25rem;
-            right: 1.5rem;
+        .toast.error {
+            background: #ef4444;
+            color: #ffffff;
         }
 
         /* ApexCharts Tooltip polish en mode sombre */
@@ -509,21 +751,26 @@
     </div>
 
     <aside class="sidebar" id="sidebar">
-        <div class="section-title">Personnalisation</div>
-
-        <div class="input-group">
-            <label>Titre du graphique</label>
-            <input type="text" id="chartTitle" placeholder="Ex: Évolution des revenus" oninput="updateUI()">
+        <div class="section-header">
+            <div class="section-title">Personnalisation</div>
+            <button class="btn-text-subtle" onclick="resetToDefault()" title="Réinitialiser les données par défaut">
+                <i data-lucide="rotate-ccw"></i> Réinitialiser
+            </button>
         </div>
 
         <div class="input-group">
-            <label>Nom de la série (Légende)</label>
-            <input type="text" id="seriesName" placeholder="Ex: Valeur en €" value="Valeur" oninput="updateUI()">
+            <label for="chartTitle">Titre du graphique</label>
+            <input type="text" id="chartTitle" placeholder="Ex: Évolution des revenus" oninput="onMetaInput()">
         </div>
 
         <div class="input-group">
-            <label>Type de graphique</label>
-            <select id="chartType" onchange="updateUI()">
+            <label for="chartSource">Source (bas à gauche)</label>
+            <input type="text" id="chartSource" placeholder="Ex: Source : Eurostat, 2026" oninput="onMetaInput()">
+        </div>
+
+        <div class="input-group">
+            <label for="chartType">Type de graphique</label>
+            <select id="chartType" onchange="onChartTypeChange()">
                 <option value="bar">Barres</option>
                 <option value="line">Courbe</option>
                 <option value="area">Zone</option>
@@ -532,13 +779,29 @@
         </div>
 
         <div class="toggles-grid">
-            <label class="toggle-container"><input type="checkbox" id="showLegend" checked onchange="updateUI()"> <span>Légende</span></label>
-            <label class="toggle-container"><input type="checkbox" id="showLabels" onchange="updateUI()"> <span>Valeurs</span></label>
-            <label class="toggle-container"><input type="checkbox" id="showBorders" onchange="updateUI()"> <span>Bordures</span></label>
-            <label class="toggle-container"><input type="checkbox" id="showShadows" onchange="updateUI()"> <span>Ombres</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showLegend" onchange="onToggleChange()"> <span>Légende</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showLabels" onchange="onToggleChange()"> <span>Valeurs</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showBorders" onchange="onToggleChange()"> <span>Bordures</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showShadows" onchange="onToggleChange()"> <span>Ombres</span></label>
+            <label class="toggle-container"><input type="checkbox" id="transparentBg" onchange="onToggleChange()"> <span>Fond transparent</span></label>
+            <label class="toggle-container"><input type="checkbox" id="stackedMode" onchange="onToggleChange()"> <span>Empilé</span></label>
         </div>
 
-        <div class="section-title">Données</div>
+        <div class="section-header">
+            <div class="section-title">Palettes harmonisées</div>
+        </div>
+        <div class="palettes-grid" id="palettesGrid"></div>
+
+        <div class="section-header">
+            <div class="section-title">Séries (Légende)</div>
+        </div>
+        <div id="donutHint" class="donut-hint">L'anneau affiche la première série et utilise la couleur de chaque donnée.</div>
+        <div id="seriesList" class="series-list"></div>
+        <button class="btn-add" id="addSeriesBtn" onclick="addSeries()">+ Ajouter une série</button>
+
+        <div class="section-header">
+            <div class="section-title">Données</div>
+        </div>
         <div id="dataList"></div>
         <button class="btn-add" onclick="addRow()">+ Nouvelle donnée</button>
     </aside>
@@ -548,39 +811,250 @@
             <button class="btn-icon" id="fullscreenBtn" onclick="toggleFullscreen()" title="Plein écran">
                 <i data-lucide="maximize"></i>
             </button>
+            <button class="btn-icon" id="shareBtn" onclick="copyShareLink()" title="Copier le lien éditable">
+                <i data-lucide="link"></i>
+            </button>
+            <button class="btn-secondary" id="copyImgBtn" onclick="copyImageHD()" title="Copier l'image HD dans le presse-papier">
+                <i data-lucide="copy"></i> Copier
+            </button>
             <button class="btn-download" id="downloadBtn" onclick="exportHD()">
                 <i data-lucide="download"></i> Exporter HD
             </button>
         </div>
 
-        <div class="export-container" id="captureArea">
-            <button class="btn-icon btn-exit-fullscreen" onclick="toggleFullscreen()" title="Quitter le plein écran" data-html2canvas-ignore="true">
-                <i data-lucide="minimize"></i>
-            </button>
-            <h2 id="displayTitle" class="export-title"></h2>
-            <div id="mainChart"></div>
-            <div class="made-with-plot" aria-hidden="true">
-                <i data-lucide="layout"></i><span>Made with <b>Plot</b></span>
+        <div class="export-stage" id="exportStage">
+            <div class="export-container" id="captureArea">
+                <button class="btn-icon btn-exit-fullscreen" onclick="toggleFullscreen()" title="Quitter le plein écran" data-html2canvas-ignore="true">
+                    <i data-lucide="minimize"></i>
+                </button>
+                <h2 id="displayTitle" class="export-title"></h2>
+                <div id="mainChart"></div>
+                <div id="displaySource" class="chart-source"></div>
+                <div class="made-with-plot" aria-hidden="true">
+                    <i data-lucide="layout"></i><span>Made with <b>Plot</b></span>
+                </div>
             </div>
         </div>
     </main>
 
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
     <script>
+        const STORAGE_KEY = 'plot-state-v2';
+
+        const PALETTES = [
+            {
+                id: 'nordic',
+                name: 'Nordic',
+                light: ['#18181b', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                dark:  ['#f4f4f5', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa']
+            },
+            {
+                id: 'ocean',
+                name: 'Océan',
+                light: ['#2563eb', '#0ea5e9', '#06b6d4', '#6366f1', '#38bdf8', '#1d4ed8'],
+                dark:  ['#3b82f6', '#38bdf8', '#22d3ee', '#818cf8', '#60a5fa', '#2563eb']
+            },
+            {
+                id: 'emerald',
+                name: 'Émeraude',
+                light: ['#10b981', '#059669', '#14b8a6', '#34d399', '#0d9488', '#047857'],
+                dark:  ['#34d399', '#10b981', '#2dd4bf', '#6ee7b7', '#14b8a6', '#059669']
+            },
+            {
+                id: 'solar',
+                name: 'Solaire',
+                light: ['#f59e0b', '#f97316', '#ef4444', '#eab308', '#fb7185', '#d97706'],
+                dark:  ['#fbbf24', '#fb923c', '#f87171', '#facc15', '#fda4af', '#f59e0b']
+            },
+            {
+                id: 'iris',
+                name: 'Iris',
+                light: ['#8b5cf6', '#a855f7', '#ec4899', '#6366f1', '#c084fc', '#f43f5e'],
+                dark:  ['#a78bfa', '#c084fc', '#f472b6', '#818cf8', '#d8b4fe', '#fb7185']
+            },
+            {
+                id: 'mono',
+                name: 'Mono',
+                light: ['#18181b', '#52525b', '#71717a', '#a1a1aa', '#3f3f46', '#d4d4d8'],
+                dark:  ['#fafafa', '#d4d4d8', '#a1a1aa', '#71717a', '#e4e4e7', '#52525b']
+            }
+        ];
+
         let chart = null;
         let currentChartType = null;
         let isDarkMode = false;
+        let toastTimer = null;
 
-        const defaultColorsLight = ['#18181b', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
-        const defaultColorsDark = ['#f4f4f5', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa'];
-        let colorIndex = 0;
+        function getPaletteColors(paletteId, dark = isDarkMode) {
+            const p = PALETTES.find(item => item.id === paletteId) || PALETTES[0];
+            return dark ? p.dark : p.light;
+        }
 
-        const defaultData = [
-            { label: 'Q1', value: 120.5 },
-            { label: 'Q2', value: 180.0 },
-            { label: 'Q3', value: 250.75 },
-            { label: 'Q4', value: 310.2 }
-        ];
+        function createDefaultState(dark = false) {
+            const cols = getPaletteColors('nordic', dark);
+            return {
+                title: '',
+                source: '',
+                chartType: 'bar',
+                showLegend: true,
+                showLabels: false,
+                showBorders: false,
+                showShadows: false,
+                transparentBg: false,
+                stacked: false,
+                activePalette: 'nordic',
+                series: [
+                    { name: 'Valeur', color: cols[0] }
+                ],
+                rows: [
+                    { label: 'Q1', values: [120.5], color: cols[0], hidden: false },
+                    { label: 'Q2', values: [180.0], color: cols[1], hidden: false },
+                    { label: 'Q3', values: [250.75], color: cols[2], hidden: false },
+                    { label: 'Q4', values: [310.2], color: cols[3], hidden: false }
+                ]
+            };
+        }
 
+        let state = createDefaultState(false);
+
+        /* --- Toast --- */
+        function showToast(message, isError = false) {
+            const el = document.getElementById('toast');
+            el.textContent = message;
+            el.className = 'toast' + (isError ? ' error' : '');
+            requestAnimationFrame(() => el.classList.add('visible'));
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('visible'), 2400);
+        }
+
+        /* --- Encodage / Décodage URL sans backend (UTF-8 safe Base64URL) --- */
+        function encodeStateToHash(st) {
+            const compact = {
+                v: 2,
+                dk: isDarkMode ? 1 : 0,
+                t: st.title,
+                so: st.source,
+                ct: st.chartType,
+                l: st.showLegend ? 1 : 0,
+                dl: st.showLabels ? 1 : 0,
+                b: st.showBorders ? 1 : 0,
+                sh: st.showShadows ? 1 : 0,
+                tr: st.transparentBg ? 1 : 0,
+                st: st.stacked ? 1 : 0,
+                p: st.activePalette || '',
+                s: st.series.map(s => [s.name, s.color]),
+                r: st.rows.map(r => [r.label, r.values, r.color, r.hidden ? 1 : 0])
+            };
+            const bytes = new TextEncoder().encode(JSON.stringify(compact));
+            let binary = '';
+            bytes.forEach(byte => { binary += String.fromCharCode(byte); });
+            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function decodeStateFromHash(hashStr) {
+            let base64 = hashStr.replace(/-/g, '+').replace(/_/g, '/');
+            while (base64.length % 4) base64 += '=';
+            const binary = atob(base64);
+            const bytes = Uint8Array.from(binary, ch => ch.charCodeAt(0));
+            const data = JSON.parse(new TextDecoder().decode(bytes));
+            if (!data || !Array.isArray(data.s) || !Array.isArray(data.r) || data.s.length === 0) {
+                throw new Error('Format invalide');
+            }
+            return {
+                dark: typeof data.dk === 'number' ? data.dk === 1 : null,
+                state: {
+                    title: String(data.t || ''),
+                    source: String(data.so || ''),
+                    chartType: ['bar', 'line', 'area', 'donut'].includes(data.ct) ? data.ct : 'bar',
+                    showLegend: Boolean(data.l),
+                    showLabels: Boolean(data.dl),
+                    showBorders: Boolean(data.b),
+                    showShadows: Boolean(data.sh),
+                    transparentBg: Boolean(data.tr),
+                    stacked: Boolean(data.st),
+                    activePalette: data.p || '',
+                    series: data.s.map(item => ({
+                        name: String(item[0] || 'Série'),
+                        color: String(item[1] || '#3b82f6')
+                    })),
+                    rows: data.r.map(item => ({
+                        label: String(item[0] || ''),
+                        values: Array.isArray(item[1]) ? item[1].map(n => Number(n) || 0) : [0],
+                        color: String(item[2] || '#3b82f6'),
+                        hidden: Boolean(item[3])
+                    }))
+                }
+            };
+        }
+
+        function saveStateToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.warn('Sauvegarde localStorage impossible', e);
+            }
+        }
+
+        function loadInitialState() {
+            // 1. Priorité au lien partagé (#data=...)
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#data=')) {
+                try {
+                    const decoded = decodeStateFromHash(hash.slice(6));
+                    if (decoded.dark !== null) applyTheme(decoded.dark, false);
+                    state = decoded.state;
+                    normalizeRowsValues();
+                    saveStateToStorage();
+                    setTimeout(() => showToast('Graphique chargé depuis le lien partagé'), 250);
+                    return;
+                } catch (err) {
+                    console.warn('Lien partagé invalide:', err);
+                }
+            }
+
+            // 2. Sinon localStorage
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && Array.isArray(parsed.series) && parsed.series.length > 0 && Array.isArray(parsed.rows)) {
+                        state = { ...createDefaultState(isDarkMode), ...parsed };
+                        normalizeRowsValues();
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.warn('Lecture localStorage impossible:', err);
+            }
+
+            // 3. Sinon valeurs par défaut
+            state = createDefaultState(isDarkMode);
+        }
+
+        function normalizeRowsValues() {
+            const count = state.series.length;
+            state.rows.forEach(row => {
+                if (!Array.isArray(row.values)) row.values = [0];
+                while (row.values.length < count) row.values.push(0);
+                if (row.values.length > count) row.values = row.values.slice(0, count);
+            });
+        }
+
+        function resetToDefault() {
+            state = createDefaultState(isDarkMode);
+            if (window.location.hash.startsWith('#data=')) {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+            syncControlsFromState();
+            renderPalettes();
+            renderSeriesList();
+            renderDataList();
+            updateUI(true);
+            showToast('Graphique réinitialisé');
+        }
+
+        /* --- Thème --- */
         function initTheme() {
             const saved = localStorage.getItem('plot-theme');
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -596,10 +1070,15 @@
             themeBtn.innerHTML = `<i data-lucide="${dark ? 'sun' : 'moon'}"></i>`;
             themeBtn.title = dark ? 'Passer en mode clair' : 'Passer en mode sombre';
 
-            // Adapte automatiquement les couleurs par défaut non modifiées (noir <-> blanc)
-            document.querySelectorAll('input[type="color"][data-auto-mono="true"]').forEach(input => {
-                input.value = dark ? defaultColorsDark[0] : defaultColorsLight[0];
-            });
+            // Si une palette active a des variantes clair/sombre, adapter automatiquement ses couleurs
+            if (shouldUpdateChart && state.activePalette) {
+                const cols = getPaletteColors(state.activePalette, dark);
+                state.series.forEach((s, i) => { s.color = cols[i % cols.length]; });
+                state.rows.forEach((r, i) => { r.color = cols[i % cols.length]; });
+                renderPalettes();
+                renderSeriesList();
+                renderDataList();
+            }
 
             lucide.createIcons();
             if (shouldUpdateChart && chart) updateUI(true);
@@ -609,13 +1088,7 @@
             applyTheme(!isDarkMode, true);
         }
 
-        function init() {
-            initTheme();
-            defaultData.forEach(d => addRow(d.label, d.value, false));
-            lucide.createIcons();
-            renderChart();
-        }
-
+        /* --- Sidebar & Contrôles --- */
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('hidden');
@@ -623,80 +1096,395 @@
             setTimeout(() => { if (chart) chart.windowResize(); }, 320);
         }
 
-        function addRow(label = '', value = '', shouldUpdate = true) {
-            const container = document.getElementById('dataList');
-            const row = document.createElement('div');
-            row.className = 'data-row';
-
-            const idx = colorIndex % defaultColorsLight.length;
-            const isAutoMono = (idx === 0);
-            const assignedColor = isDarkMode ? defaultColorsDark[idx] : defaultColorsLight[idx];
-            colorIndex++;
-
-            row.innerHTML = `
-                <input type="color" value="${assignedColor}" ${isAutoMono ? 'data-auto-mono="true"' : ''} oninput="this.removeAttribute('data-auto-mono'); updateUI()">
-                <input type="text" placeholder="Nom" value="${label}" oninput="updateUI()">
-                <input type="number" placeholder="Valeur" value="${value}" step="0.01" oninput="updateUI()">
-                <input type="checkbox" class="hide-checkbox" onchange="updateUI()" title="Masquer cette donnée">
-                <button class="btn-remove" onclick="this.parentElement.remove(); updateUI();"><i data-lucide="x" style="width: 16px;"></i></button>
-            `;
-            container.appendChild(row);
-            lucide.createIcons();
-            if (shouldUpdate) updateUI();
+        function syncControlsFromState() {
+            document.getElementById('chartTitle').value = state.title;
+            document.getElementById('chartSource').value = state.source;
+            document.getElementById('chartType').value = state.chartType;
+            document.getElementById('showLegend').checked = state.showLegend;
+            document.getElementById('showLabels').checked = state.showLabels;
+            document.getElementById('showBorders').checked = state.showBorders;
+            document.getElementById('showShadows').checked = state.showShadows;
+            document.getElementById('transparentBg').checked = state.transparentBg;
+            document.getElementById('stackedMode').checked = state.stacked;
         }
 
-        function getData() {
-            const rows = document.querySelectorAll('.data-row');
-            const labels = [], values = [], colors = [];
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                const hideCheckbox = inputs[3];
-                if (hideCheckbox && hideCheckbox.checked) {
-                    row.classList.add('hidden-row');
-                    return;
-                }
-                row.classList.remove('hidden-row');
-                if (inputs[1].value.trim() !== '') {
-                    colors.push(inputs[0].value);
-                    labels.push(inputs[1].value);
-                    values.push(Number(inputs[2].value) || 0);
-                } else {
-                    row.classList.add('hidden-row');
-                }
+        function onMetaInput() {
+            state.title = document.getElementById('chartTitle').value;
+            state.source = document.getElementById('chartSource').value;
+            updateUI(false);
+        }
+
+        function onToggleChange() {
+            state.showLegend = document.getElementById('showLegend').checked;
+            state.showLabels = document.getElementById('showLabels').checked;
+            state.showBorders = document.getElementById('showBorders').checked;
+            state.showShadows = document.getElementById('showShadows').checked;
+            state.transparentBg = document.getElementById('transparentBg').checked;
+            state.stacked = document.getElementById('stackedMode').checked;
+            updateUI(false);
+        }
+
+        function onChartTypeChange() {
+            state.chartType = document.getElementById('chartType').value;
+            renderSeriesList();
+            renderDataList();
+            updateUI(true);
+        }
+
+        /* --- Palettes harmonisées --- */
+        function renderPalettes() {
+            const grid = document.getElementById('palettesGrid');
+            grid.innerHTML = '';
+            PALETTES.forEach(palette => {
+                const cols = isDarkMode ? palette.dark : palette.light;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'palette-chip' + (state.activePalette === palette.id ? ' active' : '');
+                btn.onclick = () => applyPalette(palette.id);
+
+                const swatches = cols.slice(0, 4)
+                    .map(c => `<span class="palette-dot" style="background:${c}"></span>`)
+                    .join('');
+                btn.innerHTML = `
+                    <div class="palette-swatches">${swatches}</div>
+                    <span class="palette-name">${palette.name}</span>
+                `;
+                grid.appendChild(btn);
             });
-            return { labels, values, colors };
         }
 
+        function applyPalette(paletteId) {
+            state.activePalette = paletteId;
+            const cols = getPaletteColors(paletteId, isDarkMode);
+            state.series.forEach((s, i) => { s.color = cols[i % cols.length]; });
+            state.rows.forEach((r, i) => { r.color = cols[i % cols.length]; });
+            renderPalettes();
+            renderSeriesList();
+            renderDataList();
+            updateUI(false);
+            const p = PALETTES.find(item => item.id === paletteId);
+            if (p) showToast(`Palette « ${p.name} » appliquée`);
+        }
+
+        /* --- Gestion des séries --- */
+        function renderSeriesList() {
+            const container = document.getElementById('seriesList');
+            const hint = document.getElementById('donutHint');
+            const addBtn = document.getElementById('addSeriesBtn');
+            const isDonut = state.chartType === 'donut';
+
+            hint.style.display = isDonut ? 'block' : 'none';
+            addBtn.style.display = isDonut ? 'none' : 'block';
+
+            container.innerHTML = '';
+            const visibleSeries = isDonut ? [state.series[0]] : state.series;
+
+            visibleSeries.forEach((series, sIdx) => {
+                const row = document.createElement('div');
+                const canRemove = !isDonut && state.series.length > 1;
+                row.className = 'series-row' + (canRemove ? '' : ' single-series');
+
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = series.color;
+                colorInput.title = 'Couleur de la série';
+                colorInput.oninput = (e) => {
+                    state.series[sIdx].color = e.target.value;
+                    state.activePalette = '';
+                    // Mise à jour en place des pastilles dans les lignes multi-séries
+                    document.querySelectorAll(`[data-series-dot="${sIdx}"]`).forEach(dot => {
+                        dot.style.backgroundColor = e.target.value;
+                    });
+                    renderPalettes();
+                    updateUI(false);
+                };
+
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.value = series.name;
+                nameInput.placeholder = `Nom de la série ${sIdx + 1}`;
+                nameInput.oninput = (e) => {
+                    state.series[sIdx].name = e.target.value;
+                    document.querySelectorAll(`[data-series-name="${sIdx}"]`).forEach(lbl => {
+                        lbl.textContent = e.target.value || `Série ${sIdx + 1}`;
+                    });
+                    updateUI(false);
+                };
+
+                row.appendChild(colorInput);
+                row.appendChild(nameInput);
+
+                if (canRemove) {
+                    const rmBtn = document.createElement('button');
+                    rmBtn.type = 'button';
+                    rmBtn.className = 'btn-remove';
+                    rmBtn.title = 'Supprimer cette série';
+                    rmBtn.innerHTML = '<i data-lucide="x" style="width: 15px;"></i>';
+                    rmBtn.onclick = () => removeSeries(sIdx);
+                    row.appendChild(rmBtn);
+                }
+
+                container.appendChild(row);
+            });
+
+            lucide.createIcons();
+        }
+
+        function addSeries() {
+            const cols = getPaletteColors(state.activePalette || 'nordic', isDarkMode);
+            const nextIdx = state.series.length;
+            state.series.push({
+                name: `Série ${nextIdx + 1}`,
+                color: cols[nextIdx % cols.length]
+            });
+            state.rows.forEach(r => r.values.push(0));
+            renderSeriesList();
+            renderDataList();
+            updateUI(true);
+        }
+
+        function removeSeries(sIdx) {
+            if (state.series.length <= 1) return;
+            state.series.splice(sIdx, 1);
+            state.rows.forEach(r => r.values.splice(sIdx, 1));
+            renderSeriesList();
+            renderDataList();
+            updateUI(true);
+        }
+
+        /* --- Gestion des données --- */
+        function renderDataList() {
+            const container = document.getElementById('dataList');
+            container.innerHTML = '';
+
+            const isDonut = state.chartType === 'donut';
+            const isMultiSeries = !isDonut && state.series.length > 1;
+            const showRowColorPicker = isDonut || (state.chartType === 'bar' && state.series.length === 1);
+
+            state.rows.forEach((rowData, rIdx) => {
+                const rowEl = document.createElement('div');
+
+                if (isMultiSeries) {
+                    rowEl.className = 'data-row multi-series-row' + (rowData.hidden ? ' hidden-row' : '');
+
+                    const top = document.createElement('div');
+                    top.className = 'data-row-top';
+
+                    const labelInput = document.createElement('input');
+                    labelInput.type = 'text';
+                    labelInput.placeholder = 'Nom de la catégorie';
+                    labelInput.value = rowData.label;
+                    labelInput.oninput = (e) => {
+                        state.rows[rIdx].label = e.target.value;
+                        updateUI(false);
+                    };
+
+                    const hideCb = document.createElement('input');
+                    hideCb.type = 'checkbox';
+                    hideCb.className = 'hide-checkbox';
+                    hideCb.checked = rowData.hidden;
+                    hideCb.title = 'Masquer cette donnée';
+                    hideCb.onchange = (e) => {
+                        state.rows[rIdx].hidden = e.target.checked;
+                        rowEl.classList.toggle('hidden-row', e.target.checked);
+                        updateUI(false);
+                    };
+
+                    const rmBtn = document.createElement('button');
+                    rmBtn.type = 'button';
+                    rmBtn.className = 'btn-remove';
+                    rmBtn.title = 'Supprimer cette ligne';
+                    rmBtn.innerHTML = '<i data-lucide="x" style="width: 15px;"></i>';
+                    rmBtn.onclick = () => removeRow(rIdx);
+
+                    top.appendChild(labelInput);
+                    top.appendChild(hideCb);
+                    top.appendChild(rmBtn);
+                    rowEl.appendChild(top);
+
+                    const valuesWrap = document.createElement('div');
+                    valuesWrap.className = 'data-row-values';
+
+                    state.series.forEach((s, sIdx) => {
+                        const field = document.createElement('div');
+                        field.className = 'series-val-field';
+
+                        const lbl = document.createElement('div');
+                        lbl.className = 'series-val-label';
+
+                        const dot = document.createElement('span');
+                        dot.className = 'series-val-dot';
+                        dot.style.backgroundColor = s.color;
+                        dot.setAttribute('data-series-dot', sIdx);
+
+                        const txt = document.createElement('span');
+                        txt.textContent = s.name || `Série ${sIdx + 1}`;
+                        txt.setAttribute('data-series-name', sIdx);
+
+                        lbl.appendChild(dot);
+                        lbl.appendChild(txt);
+
+                        const valInput = document.createElement('input');
+                        valInput.type = 'number';
+                        valInput.step = '0.01';
+                        valInput.placeholder = '0';
+                        valInput.value = rowData.values[sIdx] ?? 0;
+                        valInput.oninput = (e) => {
+                            state.rows[rIdx].values[sIdx] = Number(e.target.value) || 0;
+                            updateUI(false);
+                        };
+
+                        field.appendChild(lbl);
+                        field.appendChild(valInput);
+                        valuesWrap.appendChild(field);
+                    });
+
+                    rowEl.appendChild(valuesWrap);
+                } else {
+                    rowEl.className = 'data-row'
+                        + (showRowColorPicker ? '' : ' no-row-color')
+                        + (rowData.hidden ? ' hidden-row' : '');
+
+                    if (showRowColorPicker) {
+                        const colorInput = document.createElement('input');
+                        colorInput.type = 'color';
+                        colorInput.value = rowData.color;
+                        colorInput.title = 'Couleur de cette donnée';
+                        colorInput.oninput = (e) => {
+                            state.rows[rIdx].color = e.target.value;
+                            state.activePalette = '';
+                            renderPalettes();
+                            updateUI(false);
+                        };
+                        rowEl.appendChild(colorInput);
+                    }
+
+                    const labelInput = document.createElement('input');
+                    labelInput.type = 'text';
+                    labelInput.placeholder = 'Nom';
+                    labelInput.value = rowData.label;
+                    labelInput.oninput = (e) => {
+                        state.rows[rIdx].label = e.target.value;
+                        updateUI(false);
+                    };
+
+                    const valInput = document.createElement('input');
+                    valInput.type = 'number';
+                    valInput.step = '0.01';
+                    valInput.placeholder = 'Valeur';
+                    valInput.value = rowData.values[0] ?? 0;
+                    valInput.oninput = (e) => {
+                        state.rows[rIdx].values[0] = Number(e.target.value) || 0;
+                        updateUI(false);
+                    };
+
+                    const hideCb = document.createElement('input');
+                    hideCb.type = 'checkbox';
+                    hideCb.className = 'hide-checkbox';
+                    hideCb.checked = rowData.hidden;
+                    hideCb.title = 'Masquer cette donnée';
+                    hideCb.onchange = (e) => {
+                        state.rows[rIdx].hidden = e.target.checked;
+                        rowEl.classList.toggle('hidden-row', e.target.checked);
+                        updateUI(false);
+                    };
+
+                    const rmBtn = document.createElement('button');
+                    rmBtn.type = 'button';
+                    rmBtn.className = 'btn-remove';
+                    rmBtn.title = 'Supprimer cette ligne';
+                    rmBtn.innerHTML = '<i data-lucide="x" style="width: 15px;"></i>';
+                    rmBtn.onclick = () => removeRow(rIdx);
+
+                    rowEl.appendChild(labelInput);
+                    rowEl.appendChild(valInput);
+                    rowEl.appendChild(hideCb);
+                    rowEl.appendChild(rmBtn);
+                }
+
+                container.appendChild(rowEl);
+            });
+
+            lucide.createIcons();
+        }
+
+        function addRow() {
+            const cols = getPaletteColors(state.activePalette || 'nordic', isDarkMode);
+            const nextIdx = state.rows.length;
+            state.rows.push({
+                label: `Item ${nextIdx + 1}`,
+                values: state.series.map(() => 0),
+                color: cols[nextIdx % cols.length],
+                hidden: false
+            });
+            renderDataList();
+            updateUI(false);
+        }
+
+        function removeRow(rIdx) {
+            state.rows.splice(rIdx, 1);
+            renderDataList();
+            updateUI(false);
+        }
+
+        /* --- Calcul de la hauteur plein écran (>= 90% disponible) --- */
         function getChartHeight() {
             if (document.fullscreenElement) {
                 const titleEl = document.getElementById('displayTitle');
                 const hasTitle = titleEl && titleEl.style.display !== 'none' && titleEl.textContent.trim() !== '';
                 const titleHeight = hasTitle ? (titleEl.offsetHeight + 16) : 0;
-                const verticalPadding = window.innerHeight * 0.04; // 2vh haut + 2vh bas
-                return Math.max(320, Math.floor(window.innerHeight - verticalPadding - titleHeight));
+                const verticalChrome = (window.innerHeight * 0.02) + 52; // 2vh top + marge bas (source/badge)
+                return Math.max(320, Math.floor(window.innerHeight - verticalChrome - titleHeight));
             }
             return 420;
         }
 
+        /* --- Construction des options ApexCharts --- */
         function buildChartOptions() {
-            const { labels, values, colors } = getData();
-            const type = document.getElementById('chartType').value;
-            const seriesName = document.getElementById('seriesName').value || 'Valeur';
-            const showLegend = document.getElementById('showLegend').checked;
-            const showLabels = document.getElementById('showLabels').checked;
-            const showBorders = document.getElementById('showBorders').checked;
-            const showShadows = document.getElementById('showShadows').checked;
+            const visibleRows = state.rows.filter(r => !r.hidden && r.label.trim() !== '');
+            const labels = visibleRows.map(r => r.label);
+            const rowColors = visibleRows.map(r => r.color);
+            const type = state.chartType;
 
             const isCircular = (type === 'donut');
             const isLineOrArea = (type === 'line' || type === 'area');
-            const primarySeriesColor = colors[0] || (isDarkMode ? '#f4f4f5' : '#18181b');
+            const isMultiSeries = !isCircular && state.series.length > 1;
+            const isSingleSeriesBar = (type === 'bar' && state.series.length === 1);
+
+            const seriesColors = state.series.map(s => s.color);
             const textColor = isDarkMode ? '#a1a1aa' : '#52525b';
             const strongTextColor = isDarkMode ? '#f4f4f5' : '#18181b';
             const cardBg = isDarkMode ? '#121216' : '#ffffff';
             const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9';
 
-            const formatDecimals = val => Number(val).toFixed(2);
+            const formatDecimals = val => {
+                const num = Number(val);
+                return Number.isFinite(num) ? num.toFixed(2) : '0.00';
+            };
 
+            // Construction des séries
+            let apexSeries;
+            if (isCircular) {
+                apexSeries = visibleRows.map(r => Number(r.values[0]) || 0);
+            } else if (isSingleSeriesBar) {
+                // Utilise fillColor par barre tout en gardant distributed: false
+                // -> les couleurs individuelles fonctionnent ET le nom de la série s'affiche dans la légende
+                apexSeries = [{
+                    name: state.series[0].name || 'Valeur',
+                    data: visibleRows.map(r => ({
+                        x: r.label,
+                        y: Number(r.values[0]) || 0,
+                        fillColor: r.color
+                    }))
+                }];
+            } else {
+                apexSeries = state.series.map((s, sIdx) => ({
+                    name: s.name || `Série ${sIdx + 1}`,
+                    data: visibleRows.map(r => Number(r.values[sIdx]) || 0)
+                }));
+            }
+
+            // Stroke : ligne toujours visible en mode courbe/zone
             let strokeOptions;
             if (isLineOrArea) {
                 strokeOptions = {
@@ -704,18 +1492,18 @@
                     curve: 'smooth',
                     width: 3,
                     lineCap: 'round',
-                    colors: [primarySeriesColor]
+                    colors: seriesColors
                 };
             } else if (isCircular) {
                 strokeOptions = {
-                    show: showBorders,
-                    width: showBorders ? 3 : 0,
-                    colors: [cardBg]
+                    show: state.showBorders,
+                    width: state.showBorders ? 3 : 0,
+                    colors: [state.transparentBg ? 'transparent' : cardBg]
                 };
             } else {
                 strokeOptions = {
-                    show: showBorders,
-                    width: showBorders ? 2 : 0,
+                    show: state.showBorders,
+                    width: state.showBorders ? 2 : 0,
                     colors: [isDarkMode ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.35)']
                 };
             }
@@ -725,7 +1513,7 @@
                     type: 'gradient',
                     gradient: {
                         shadeIntensity: 1,
-                        opacityFrom: isDarkMode ? 0.35 : 0.28,
+                        opacityFrom: isDarkMode ? 0.32 : 0.26,
                         opacityTo: 0.02,
                         stops: [0, 95, 100]
                     }
@@ -737,29 +1525,25 @@
                     size: 5,
                     strokeWidth: 2,
                     strokeColors: cardBg,
-                    hover: { size: 7 },
-                    discrete: colors.map((color, idx) => ({
-                        seriesIndex: 0,
-                        dataPointIndex: idx,
-                        fillColor: color,
-                        strokeColor: cardBg,
-                        size: 5
-                    }))
+                    hover: { size: 7 }
                 }
-                : { size: 0, discrete: [] };
+                : { size: 0 };
+
+            const canStack = state.stacked && isMultiSeries && (type === 'bar' || type === 'area');
 
             return {
                 chart: {
                     type: type,
                     width: '100%',
                     height: getChartHeight(),
+                    stacked: canStack,
                     background: 'transparent',
                     foreColor: textColor,
                     toolbar: { show: false },
                     fontFamily: 'Inter, sans-serif',
                     animations: { enabled: true, speed: 350 },
                     dropShadow: {
-                        enabled: showShadows,
+                        enabled: state.showShadows,
                         top: 6,
                         left: 0,
                         blur: 8,
@@ -768,9 +1552,9 @@
                     }
                 },
                 theme: { mode: isDarkMode ? 'dark' : 'light' },
-                colors: isLineOrArea ? [primarySeriesColor] : colors,
+                colors: isCircular ? rowColors : seriesColors,
                 labels: labels,
-                series: isCircular ? values : [{ name: seriesName, data: values }],
+                series: apexSeries,
                 stroke: strokeOptions,
                 fill: fillOptions,
                 markers: markersOptions,
@@ -779,12 +1563,19 @@
                     strokeDashArray: 4,
                     padding: { top: 10, right: 16, bottom: 10, left: 10 }
                 },
-                xaxis: {
-                    categories: labels,
-                    axisBorder: { color: gridColor },
-                    axisTicks: { color: gridColor },
-                    labels: { style: { colors: textColor, fontSize: '12px' } }
-                },
+                xaxis: isSingleSeriesBar
+                    ? {
+                        type: 'category',
+                        axisBorder: { color: gridColor },
+                        axisTicks: { color: gridColor },
+                        labels: { style: { colors: textColor, fontSize: '12px' } }
+                    }
+                    : {
+                        categories: labels,
+                        axisBorder: { color: gridColor },
+                        axisTicks: { color: gridColor },
+                        labels: { style: { colors: textColor, fontSize: '12px' } }
+                    },
                 yaxis: {
                     labels: {
                         formatter: formatDecimals,
@@ -793,10 +1584,13 @@
                 },
                 tooltip: {
                     theme: isDarkMode ? 'dark' : 'light',
+                    shared: isMultiSeries && !isCircular,
+                    intersect: false,
                     y: { formatter: formatDecimals }
                 },
                 legend: {
-                    show: showLegend,
+                    show: state.showLegend,
+                    showForSingleSeries: true,
                     position: 'bottom',
                     fontSize: '13px',
                     fontFamily: 'Inter, sans-serif',
@@ -804,18 +1598,18 @@
                     labels: { colors: strongTextColor }
                 },
                 dataLabels: {
-                    enabled: showLabels,
+                    enabled: state.showLabels,
                     formatter: isCircular ? (val => Number(val).toFixed(1) + '%') : formatDecimals,
-                    offsetY: isLineOrArea ? -10 : (type === 'bar' ? -22 : 0),
+                    offsetY: isLineOrArea ? -10 : (type === 'bar' && !canStack ? -20 : 0),
                     style: {
                         fontSize: '12px',
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 600,
-                        colors: isCircular ? ['#ffffff'] : [strongTextColor]
+                        colors: (isCircular || canStack) ? ['#ffffff'] : [strongTextColor]
                     },
                     background: { enabled: false },
                     dropShadow: {
-                        enabled: isCircular,
+                        enabled: isCircular || canStack,
                         top: 1,
                         left: 1,
                         blur: 2,
@@ -824,13 +1618,41 @@
                 },
                 plotOptions: {
                     bar: {
-                        borderRadius: 6,
-                        columnWidth: '45%',
-                        dataLabels: { position: 'top' },
-                        distributed: true
+                        borderRadius: canStack ? 3 : 6,
+                        columnWidth: isMultiSeries ? '60%' : '45%',
+                        dataLabels: { position: canStack ? 'center' : 'top' },
+                        distributed: false
                     },
                     pie: {
-                        donut: { size: '70%' }
+                        donut: {
+                            size: '70%',
+                            labels: {
+                                show: true,
+                                name: {
+                                    show: true,
+                                    color: textColor,
+                                    fontSize: '13px'
+                                },
+                                value: {
+                                    show: true,
+                                    color: strongTextColor,
+                                    fontSize: '20px',
+                                    fontWeight: 700,
+                                    formatter: formatDecimals
+                                },
+                                total: {
+                                    show: true,
+                                    label: state.series[0]?.name || 'Total',
+                                    color: textColor,
+                                    fontSize: '13px',
+                                    fontWeight: 600,
+                                    formatter: (w) => {
+                                        const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                                        return formatDecimals(sum);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             };
@@ -839,36 +1661,51 @@
         function renderChart() {
             const options = buildChartOptions();
             currentChartType = options.chart.type;
-            if (chart) {
-                chart.destroy();
-            }
+            if (chart) chart.destroy();
             chart = new ApexCharts(document.querySelector('#mainChart'), options);
             chart.render();
         }
 
         function updateUI(forceRecreate = false) {
-            const titleInput = document.getElementById('chartTitle').value;
+            // Titre
             const displayTitle = document.getElementById('displayTitle');
-            if (titleInput.trim() !== '') {
-                displayTitle.textContent = titleInput;
+            if (state.title.trim() !== '') {
+                displayTitle.textContent = state.title;
                 displayTitle.style.display = 'block';
             } else {
                 displayTitle.textContent = '';
                 displayTitle.style.display = 'none';
             }
 
+            // Source en bas à gauche
+            const displaySource = document.getElementById('displaySource');
+            if (state.source.trim() !== '') {
+                displaySource.textContent = state.source;
+                displaySource.style.display = 'inline-flex';
+            } else {
+                displaySource.textContent = '';
+                displaySource.style.display = 'none';
+            }
+
+            // Fond transparent (aperçu damier sur le wrapper, transparence réelle sur #captureArea)
+            const stage = document.getElementById('exportStage');
+            const captureArea = document.getElementById('captureArea');
+            stage.classList.toggle('checkerboard', state.transparentBg);
+            captureArea.classList.toggle('is-transparent', state.transparentBg);
+
+            // Auto-sauvegarde localStorage
+            saveStateToStorage();
+
             if (!chart) return;
 
-            const newType = document.getElementById('chartType').value;
-            // Recréation propre si le type change (évite tout bug d'état ApexCharts)
-            if (forceRecreate || newType !== currentChartType) {
+            if (forceRecreate || state.chartType !== currentChartType) {
                 renderChart();
             } else {
-                chart.updateOptions(buildChartOptions(), false, true);
+                chart.updateOptions(buildChartOptions(), true, true);
             }
         }
 
-        /* Plein écran */
+        /* --- Plein écran --- */
         function toggleFullscreen() {
             const el = document.getElementById('captureArea');
             if (!document.fullscreenElement) {
@@ -881,10 +1718,7 @@
         function syncFullscreenChartSize() {
             if (!chart) return;
             chart.updateOptions({
-                chart: {
-                    width: '100%',
-                    height: getChartHeight()
-                }
+                chart: { width: '100%', height: getChartHeight() }
             }, false, false);
         }
 
@@ -898,7 +1732,6 @@
             btn.innerHTML = `<i data-lucide="${isFs ? 'minimize' : 'maximize'}"></i>`;
             lucide.createIcons();
 
-            // Attendre que le navigateur applique les dimensions plein écran
             requestAnimationFrame(() => {
                 syncFullscreenChartSize();
                 setTimeout(syncFullscreenChartSize, 150);
@@ -906,36 +1739,134 @@
         });
 
         window.addEventListener('resize', () => {
-            if (document.fullscreenElement) {
-                syncFullscreenChartSize();
-            }
+            if (document.fullscreenElement) syncFullscreenChartSize();
         });
 
-        function exportHD() {
-            const btn = document.getElementById('downloadBtn');
+        /* --- Capture haute qualité (Export HD & Presse-papier) --- */
+        function captureChartCanvas() {
             const element = document.getElementById('captureArea');
+            const bgColor = state.transparentBg ? null : (isDarkMode ? '#121216' : '#ffffff');
+            return html2canvas(element, {
+                scale: 4,
+                backgroundColor: bgColor,
+                useCORS: true,
+                logging: false
+            });
+        }
+
+        async function copyImageHD() {
+            const btn = document.getElementById('copyImgBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Copie...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            try {
+                if (!navigator.clipboard || typeof ClipboardItem === 'undefined') {
+                    throw new Error('ClipboardItem indisponible');
+                }
+
+                const blobPromise = captureChartCanvas().then(canvas =>
+                    new Promise((resolve, reject) => {
+                        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Blob PNG échoué')), 'image/png');
+                    })
+                );
+
+                // Passage de la Promise directement pour préserver l'activation utilisateur (Chrome & Safari)
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blobPromise })
+                ]);
+
+                btn.innerHTML = '<i data-lucide="check"></i> Copié';
+                lucide.createIcons();
+                showToast(state.transparentBg ? 'Image PNG transparente HD copiée !' : 'Image HD copiée dans le presse-papier !');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }, 1600);
+            } catch (err) {
+                console.warn('Copie presse-papier impossible:', err);
+                showToast('Copie bloquée par le navigateur (ouvrez via HTTPS/localhost ou utilisez Exporter HD)', true);
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        }
+
+        async function exportHD() {
+            const btn = document.getElementById('downloadBtn');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Génération...';
             btn.disabled = true;
             lucide.createIcons();
 
-            setTimeout(() => {
-                html2canvas(element, {
-                    scale: 4,
-                    backgroundColor: isDarkMode ? '#121216' : '#ffffff',
-                    logging: false
-                }).then(canvas => {
-                    const link = document.createElement('a');
-                    const titleInput = document.getElementById('chartTitle').value.trim();
-                    const fileName = titleInput ? `Plot-${titleInput.replace(/\s+/g, '-')}.png` : 'Plot-Graphique-HD.png';
-                    link.download = fileName;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
+            try {
+                const canvas = await captureChartCanvas();
+                const link = document.createElement('a');
+                const cleanTitle = state.title.trim().replace(/\s+/g, '-');
+                link.download = cleanTitle ? `Plot-${cleanTitle}.png` : 'Plot-Graphique-HD.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('Image HD exportée !');
+            } catch (err) {
+                console.error(err);
+                showToast("Erreur lors de l'export HD", true);
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        }
+
+        /* --- Lien de partage éditable sans backend --- */
+        async function copyShareLink() {
+            const btn = document.getElementById('shareBtn');
+            const originalHTML = btn.innerHTML;
+
+            try {
+                const encoded = encodeStateToHash(state);
+                const shareUrl = `${window.location.href.split('#')[0]}#data=${encoded}`;
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(shareUrl);
+                } else {
+                    const ta = document.createElement('textarea');
+                    ta.value = shareUrl;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                }
+
+                btn.innerHTML = '<i data-lucide="check"></i>';
+                lucide.createIcons();
+                showToast('Lien éditable copié dans le presse-papier !');
+
+                setTimeout(() => {
                     btn.innerHTML = originalHTML;
-                    btn.disabled = false;
                     lucide.createIcons();
-                });
-            }, 100);
+                }, 1600);
+            } catch (err) {
+                console.error(err);
+                showToast('Impossible de copier le lien', true);
+            }
+        }
+
+        /* --- Initialisation --- */
+        function init() {
+            initTheme();
+            loadInitialState();
+            syncControlsFromState();
+            renderPalettes();
+            renderSeriesList();
+            renderDataList();
+            lucide.createIcons();
+            renderChart();
+            updateUI(false);
         }
 
         init();
