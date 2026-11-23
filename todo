@@ -1,4 +1,7 @@
-- import csv
+- import csv, xlsx
 - plus de types de graphes
 - export en différents types de fichiers
-- 
+- AI BYOK avec graphe généré automatiquement 
+- bouton trier croissant/décroissant
+- ratios prédéfinis
+- annuler cmd Z et rétablir

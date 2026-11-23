@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plot — Graphiques Modernes</title>
+    <title>MyPlot — Graphiques Modernes</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -34,6 +34,7 @@
             --badge-bg: rgba(255, 255, 255, 0.88);
             --checker-a: #f4f4f5;
             --checker-b: #e4e4e7;
+            --series-shadow: drop-shadow(0 6px 8px rgba(15, 23, 42, 0.18));
             --shadow-card: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
             --shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.05);
             --shadow-primary: 0 8px 16px rgba(0, 0, 0, 0.15);
@@ -66,6 +67,7 @@
             --badge-bg: rgba(24, 24, 29, 0.88);
             --checker-a: #18181d;
             --checker-b: #24242c;
+            --series-shadow: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.55));
             --shadow-card: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
             --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.45);
             --shadow-primary: 0 8px 20px rgba(0, 0, 0, 0.5);
@@ -88,7 +90,7 @@
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        /* --- Top-bar : Repli + Plot à gauche, Toggle Dark Mode à droite du panel --- */
+        /* --- Top-bar : Repli + MyPlot à gauche, Toggle Dark Mode à droite du panel --- */
         .top-bar {
             position: absolute;
             top: 0;
@@ -507,6 +509,11 @@
             background: transparent;
         }
 
+        /* Ombre CSS sur les séries : évite le bug SVG <filter> de Safari en plein écran */
+        #captureArea.has-shadows .apexcharts-series {
+            filter: var(--series-shadow);
+        }
+
         .export-title {
             text-align: center;
             font-size: 1.5rem;
@@ -520,7 +527,7 @@
 
         #mainChart { width: 100%; }
 
-        /* Source (bas à gauche, en symétrie exacte avec Made with Plot) */
+        /* Source (bas à gauche, en symétrie exacte avec Made with MyPlot) */
         .chart-source {
             position: absolute;
             bottom: 14px;
@@ -539,8 +546,8 @@
             user-select: none;
         }
 
-        /* Badge Made With Plot (bas à droite) */
-        .made-with-plot {
+        /* Badge Made With MyPlot (bas à droite) */
+        .made-with-MyPlot {
             position: absolute;
             bottom: 14px;
             right: 16px;
@@ -561,14 +568,14 @@
             text-transform: uppercase;
             user-select: none;
         }
-        .made-with-plot svg {
+        .made-with-MyPlot svg {
             width: 12px;
             height: 12px;
             stroke: var(--text-main);
             fill: none;
         }
-        .made-with-plot span { color: var(--text-muted); }
-        .made-with-plot b { color: var(--text-main); }
+        .made-with-MyPlot span { color: var(--text-muted); }
+        .made-with-MyPlot b { color: var(--text-main); }
 
         /* Actions */
         .actions {
@@ -685,7 +692,7 @@
         #captureArea.is-fullscreen .btn-exit-fullscreen { display: flex; }
         #captureArea.is-fullscreen .export-title { margin-bottom: 1rem; flex-shrink: 0; }
         #captureArea.is-fullscreen #mainChart { width: 100%; flex: 1; min-height: 0; }
-        #captureArea.is-fullscreen .made-with-plot { bottom: 1.15rem; right: 1.5rem; }
+        #captureArea.is-fullscreen .made-with-MyPlot { bottom: 1.15rem; right: 1.5rem; }
         #captureArea.is-fullscreen .chart-source { bottom: 1.15rem; left: 1.5rem; }
 
         /* Toast notification */
@@ -742,7 +749,7 @@
             </button>
             <div class="app-brand">
                 <i data-lucide="bar-chart-2"></i>
-                <span>Plot</span>
+                <span>MyPlot</span>
             </div>
         </div>
         <button class="btn-theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Changer de thème">
@@ -830,8 +837,8 @@
                 <h2 id="displayTitle" class="export-title"></h2>
                 <div id="mainChart"></div>
                 <div id="displaySource" class="chart-source"></div>
-                <div class="made-with-plot" aria-hidden="true">
-                    <i data-lucide="layout"></i><span>Made with <b>Plot</b></span>
+                <div class="made-with-MyPlot" aria-hidden="true">
+                    <i data-lucide="layout"></i><span>Made with <b>MyPlot</b></span>
                 </div>
             </div>
         </div>
@@ -840,7 +847,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
-        const STORAGE_KEY = 'plot-state-v2';
+        const STORAGE_KEY = 'MyPlot-state-v2';
 
         const PALETTES = [
             {
@@ -885,6 +892,11 @@
         let currentChartType = null;
         let isDarkMode = false;
         let toastTimer = null;
+        let resizeRenderTimer = null;
+
+        function getFullscreenElement() {
+            return document.fullscreenElement || document.webkitFullscreenElement || null;
+        }
 
         function getPaletteColors(paletteId, dark = isDarkMode) {
             const p = PALETTES.find(item => item.id === paletteId) || PALETTES[0];
@@ -997,7 +1009,6 @@
         }
 
         function loadInitialState() {
-            // 1. Priorité au lien partagé (#data=...)
             const hash = window.location.hash;
             if (hash && hash.startsWith('#data=')) {
                 try {
@@ -1013,7 +1024,6 @@
                 }
             }
 
-            // 2. Sinon localStorage
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (raw) {
@@ -1028,7 +1038,6 @@
                 console.warn('Lecture localStorage impossible:', err);
             }
 
-            // 3. Sinon valeurs par défaut
             state = createDefaultState(isDarkMode);
         }
 
@@ -1056,7 +1065,7 @@
 
         /* --- Thème --- */
         function initTheme() {
-            const saved = localStorage.getItem('plot-theme');
+            const saved = localStorage.getItem('MyPlot-theme');
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             applyTheme(saved ? saved === 'dark' : prefersDark, false);
         }
@@ -1064,13 +1073,12 @@
         function applyTheme(dark, shouldUpdateChart = true) {
             isDarkMode = dark;
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-            localStorage.setItem('plot-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('MyPlot-theme', dark ? 'dark' : 'light');
 
             const themeBtn = document.getElementById('themeToggleBtn');
             themeBtn.innerHTML = `<i data-lucide="${dark ? 'sun' : 'moon'}"></i>`;
             themeBtn.title = dark ? 'Passer en mode clair' : 'Passer en mode sombre';
 
-            // Si une palette active a des variantes clair/sombre, adapter automatiquement ses couleurs
             if (shouldUpdateChart && state.activePalette) {
                 const cols = getPaletteColors(state.activePalette, dark);
                 state.series.forEach((s, i) => { s.color = cols[i % cols.length]; });
@@ -1093,7 +1101,7 @@
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('hidden');
             document.body.classList.toggle('sidebar-collapsed', sidebar.classList.contains('hidden'));
-            setTimeout(() => { if (chart) chart.windowResize(); }, 320);
+            scheduleCleanRerender(320);
         }
 
         function syncControlsFromState() {
@@ -1191,7 +1199,6 @@
                 colorInput.oninput = (e) => {
                     state.series[sIdx].color = e.target.value;
                     state.activePalette = '';
-                    // Mise à jour en place des pastilles dans les lignes multi-séries
                     document.querySelectorAll(`[data-series-dot="${sIdx}"]`).forEach(dot => {
                         dot.style.backgroundColor = e.target.value;
                     });
@@ -1429,18 +1436,22 @@
 
         /* --- Calcul de la hauteur plein écran (>= 90% disponible) --- */
         function getChartHeight() {
-            if (document.fullscreenElement) {
+            if (getFullscreenElement()) {
+                const chartEl = document.getElementById('mainChart');
+                if (chartEl && chartEl.clientHeight > 200) {
+                    return Math.floor(chartEl.clientHeight);
+                }
                 const titleEl = document.getElementById('displayTitle');
                 const hasTitle = titleEl && titleEl.style.display !== 'none' && titleEl.textContent.trim() !== '';
                 const titleHeight = hasTitle ? (titleEl.offsetHeight + 16) : 0;
-                const verticalChrome = (window.innerHeight * 0.02) + 52; // 2vh top + marge bas (source/badge)
+                const verticalChrome = (window.innerHeight * 0.02) + 52;
                 return Math.max(320, Math.floor(window.innerHeight - verticalChrome - titleHeight));
             }
             return 420;
         }
 
         /* --- Construction des options ApexCharts --- */
-        function buildChartOptions() {
+        function buildChartOptions(animate = true) {
             const visibleRows = state.rows.filter(r => !r.hidden && r.label.trim() !== '');
             const labels = visibleRows.map(r => r.label);
             const rowColors = visibleRows.map(r => r.color);
@@ -1462,13 +1473,10 @@
                 return Number.isFinite(num) ? num.toFixed(2) : '0.00';
             };
 
-            // Construction des séries
             let apexSeries;
             if (isCircular) {
                 apexSeries = visibleRows.map(r => Number(r.values[0]) || 0);
             } else if (isSingleSeriesBar) {
-                // Utilise fillColor par barre tout en gardant distributed: false
-                // -> les couleurs individuelles fonctionnent ET le nom de la série s'affiche dans la légende
                 apexSeries = [{
                     name: state.series[0].name || 'Valeur',
                     data: visibleRows.map(r => ({
@@ -1484,7 +1492,6 @@
                 }));
             }
 
-            // Stroke : ligne toujours visible en mode courbe/zone
             let strokeOptions;
             if (isLineOrArea) {
                 strokeOptions = {
@@ -1540,16 +1547,11 @@
                     background: 'transparent',
                     foreColor: textColor,
                     toolbar: { show: false },
+                    zoom: { enabled: false },
                     fontFamily: 'Inter, sans-serif',
-                    animations: { enabled: true, speed: 350 },
-                    dropShadow: {
-                        enabled: state.showShadows,
-                        top: 6,
-                        left: 0,
-                        blur: 8,
-                        color: isDarkMode ? '#000000' : '#0f172a',
-                        opacity: isDarkMode ? 0.45 : 0.14
-                    }
+                    animations: { enabled: animate, speed: 350 },
+                    // Ombre gérée en CSS (.has-shadows) pour éviter le bug SVG <filter> en plein écran
+                    dropShadow: { enabled: false }
                 },
                 theme: { mode: isDarkMode ? 'dark' : 'light' },
                 colors: isCircular ? rowColors : seriesColors,
@@ -1608,15 +1610,9 @@
                         colors: (isCircular || canStack) ? ['#ffffff'] : [strongTextColor]
                     },
                     background: { enabled: false },
-                    dropShadow: {
-                        enabled: isCircular || canStack,
-                        top: 1,
-                        left: 1,
-                        blur: 2,
-                        opacity: 0.45
-                    }
+                    dropShadow: { enabled: false }
                 },
-                plotOptions: {
+                MyPlotOptions: {
                     bar: {
                         borderRadius: canStack ? 3 : 6,
                         columnWidth: isMultiSeries ? '60%' : '45%',
@@ -1658,16 +1654,27 @@
             };
         }
 
-        function renderChart() {
-            const options = buildChartOptions();
+        function renderChart(animate = true) {
+            const options = buildChartOptions(animate);
             currentChartType = options.chart.type;
-            if (chart) chart.destroy();
-            chart = new ApexCharts(document.querySelector('#mainChart'), options);
+            if (chart) {
+                chart.destroy();
+                chart = null;
+            }
+            const container = document.querySelector('#mainChart');
+            container.innerHTML = '';
+            chart = new ApexCharts(container, options);
             chart.render();
         }
 
+        function scheduleCleanRerender(delay = 120) {
+            clearTimeout(resizeRenderTimer);
+            resizeRenderTimer = setTimeout(() => {
+                renderChart(false);
+            }, delay);
+        }
+
         function updateUI(forceRecreate = false) {
-            // Titre
             const displayTitle = document.getElementById('displayTitle');
             if (state.title.trim() !== '') {
                 displayTitle.textContent = state.title;
@@ -1677,7 +1684,6 @@
                 displayTitle.style.display = 'none';
             }
 
-            // Source en bas à gauche
             const displaySource = document.getElementById('displaySource');
             if (state.source.trim() !== '') {
                 displaySource.textContent = state.source;
@@ -1687,59 +1693,58 @@
                 displaySource.style.display = 'none';
             }
 
-            // Fond transparent (aperçu damier sur le wrapper, transparence réelle sur #captureArea)
             const stage = document.getElementById('exportStage');
             const captureArea = document.getElementById('captureArea');
             stage.classList.toggle('checkerboard', state.transparentBg);
             captureArea.classList.toggle('is-transparent', state.transparentBg);
+            captureArea.classList.toggle('has-shadows', state.showShadows);
 
-            // Auto-sauvegarde localStorage
             saveStateToStorage();
 
             if (!chart) return;
 
             if (forceRecreate || state.chartType !== currentChartType) {
-                renderChart();
+                renderChart(true);
             } else {
-                chart.updateOptions(buildChartOptions(), true, true);
+                chart.updateOptions(buildChartOptions(true), true, true);
             }
         }
 
         /* --- Plein écran --- */
         function toggleFullscreen() {
             const el = document.getElementById('captureArea');
-            if (!document.fullscreenElement) {
-                el.requestFullscreen().catch(err => console.warn('Plein écran impossible', err));
+            if (!getFullscreenElement()) {
+                const req = el.requestFullscreen || el.webkitRequestFullscreen;
+                if (req) {
+                    Promise.resolve(req.call(el)).catch(err => console.warn('Plein écran impossible', err));
+                }
             } else {
-                document.exitFullscreen();
+                const exit = document.exitFullscreen || document.webkitExitFullscreen;
+                if (exit) exit.call(document);
             }
         }
 
-        function syncFullscreenChartSize() {
-            if (!chart) return;
-            chart.updateOptions({
-                chart: { width: '100%', height: getChartHeight() }
-            }, false, false);
-        }
-
-        document.addEventListener('fullscreenchange', () => {
+        function handleFullscreenChange() {
             const btn = document.getElementById('fullscreenBtn');
             const captureArea = document.getElementById('captureArea');
-            const isFs = Boolean(document.fullscreenElement);
+            const isFs = Boolean(getFullscreenElement());
 
             captureArea.classList.toggle('is-fullscreen', isFs);
             btn.classList.toggle('fullscreen-active', isFs);
             btn.innerHTML = `<i data-lucide="${isFs ? 'minimize' : 'maximize'}"></i>`;
             lucide.createIcons();
 
-            requestAnimationFrame(() => {
-                syncFullscreenChartSize();
-                setTimeout(syncFullscreenChartSize, 150);
-            });
-        });
+            // Reconstruit proprement le graphique une fois les nouvelles dimensions appliquées
+            scheduleCleanRerender(120);
+        }
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
         window.addEventListener('resize', () => {
-            if (document.fullscreenElement) syncFullscreenChartSize();
+            if (getFullscreenElement()) {
+                scheduleCleanRerender(140);
+            }
         });
 
         /* --- Capture haute qualité (Export HD & Presse-papier) --- */
@@ -1772,7 +1777,6 @@
                     })
                 );
 
-                // Passage de la Promise directement pour préserver l'activation utilisateur (Chrome & Safari)
                 await navigator.clipboard.write([
                     new ClipboardItem({ 'image/png': blobPromise })
                 ]);
@@ -1806,7 +1810,7 @@
                 const canvas = await captureChartCanvas();
                 const link = document.createElement('a');
                 const cleanTitle = state.title.trim().replace(/\s+/g, '-');
-                link.download = cleanTitle ? `Plot-${cleanTitle}.png` : 'Plot-Graphique-HD.png';
+                link.download = cleanTitle ? `MyPlot-${cleanTitle}.png` : 'MyPlot-Graphique-HD.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
                 showToast('Image HD exportée !');
@@ -1865,7 +1869,7 @@
             renderSeriesList();
             renderDataList();
             lucide.createIcons();
-            renderChart();
+            renderChart(true);
             updateUI(false);
         }
 
