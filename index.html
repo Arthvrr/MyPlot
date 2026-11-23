@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plot — Graphiques Modernes</title>
+    <title>MyPlot — Graphiques Modernes</title>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:wght@500;600;700&family=Playfair+Display:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             color-scheme: light;
@@ -42,6 +43,7 @@
             --shadow-menu: 0 18px 40px -8px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
             --radius-lg: 24px;
             --radius-md: 12px;
+            --chart-font: 'Inter', sans-serif;
         }
 
         [data-theme="dark"] {
@@ -93,7 +95,31 @@
             transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        /* --- Top-bar : Repli + Plot à gauche, Toggle Dark Mode à droite du panel --- */
+        /* --- Mode Embed Interactif --- */
+        body.is-embed {
+            background: transparent;
+        }
+        body.is-embed .top-bar,
+        body.is-embed .sidebar,
+        body.is-embed .actions {
+            display: none !important;
+        }
+        body.is-embed .main-content {
+            padding: 0;
+            background: transparent;
+            width: 100vw;
+            height: 100vh;
+        }
+        body.is-embed .export-stage {
+            max-width: none !important;
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+        }
+
+        /* --- Top-bar : Repli + MyPlot à gauche, Toggle Dark Mode à droite du panel --- */
         .top-bar {
             position: absolute;
             top: 0;
@@ -176,9 +202,15 @@
             padding-top: 5rem;
             overflow-y: auto;
             z-index: 10;
+            position: relative;
             transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease, border-color 0.25s ease;
         }
         .sidebar.hidden { margin-left: -420px; }
+        .sidebar.drag-over {
+            outline: 2px dashed var(--primary);
+            outline-offset: -8px;
+            background: var(--card-subtle);
+        }
 
         .sidebar::-webkit-scrollbar { width: 6px; }
         .sidebar::-webkit-scrollbar-track { background: transparent; }
@@ -206,13 +238,14 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            flex-wrap: wrap;
         }
 
         .btn-text-subtle {
             background: transparent;
             border: 1px solid transparent;
             color: var(--text-muted);
-            font-size: 0.74rem;
+            font-size: 0.73rem;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
@@ -234,6 +267,14 @@
         .btn-text-subtle svg { width: 13px; height: 13px; }
 
         .input-group { margin-bottom: 0.95rem; }
+        .input-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 0.95rem;
+        }
+        .input-row-2 .input-group { margin-bottom: 0; }
+
         label {
             display: block;
             font-size: 0.83rem;
@@ -327,13 +368,13 @@
             gap: 3px;
         }
         .palette-dot {
-            width: 12px;
-            height: 12px;
+            width: 11px;
+            height: 11px;
             border-radius: 50%;
             border: 1px solid rgba(128, 128, 128, 0.2);
         }
         .palette-name {
-            font-size: 0.74rem;
+            font-size: 0.73rem;
             font-weight: 600;
             color: var(--text-main);
         }
@@ -477,20 +518,31 @@
             accent-color: var(--primary);
         }
 
+        .data-actions-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 0.35rem;
+        }
+
         .btn-add {
             background: var(--add-bg);
             border: 1px dashed var(--add-border);
-            padding: 0.68rem;
+            padding: 0.68rem 0.75rem;
             border-radius: var(--radius-md);
             cursor: pointer;
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.83rem;
             font-weight: 500;
             color: var(--text-main);
-            margin-top: 0.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             transition: all 0.2s;
         }
         .btn-add:hover { background: var(--add-hover); }
+        .btn-add svg { width: 14px; height: 14px; }
 
         .btn-remove {
             background: var(--danger-bg);
@@ -555,6 +607,16 @@
             justify-content: center;
             position: relative;
             transition: background-color 0.25s ease;
+            font-family: var(--chart-font);
+        }
+
+        .export-container .export-title,
+        .export-container .avg-badge,
+        .export-container .chart-source,
+        .export-container .made-with-plot,
+        .export-container .made-with-plot span,
+        .export-container .made-with-plot b {
+            font-family: var(--chart-font);
         }
 
         .export-container.is-transparent {
@@ -604,7 +666,7 @@
             min-height: 0;
         }
 
-        /* Source (bas à gauche, en symétrie exacte avec Made with Plot) */
+        /* Source (bas à gauche, en symétrie exacte avec Made with MyPlot) */
         .chart-source {
             position: absolute;
             bottom: 14px;
@@ -615,7 +677,7 @@
             font-size: 0.72rem;
             font-weight: 500;
             color: var(--text-muted);
-            max-width: calc(100% - 175px);
+            max-width: calc(100% - 190px);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -623,7 +685,7 @@
             user-select: none;
         }
 
-        /* Badge Made With Plot (bas à droite) */
+        /* Badge Made With MyPlot (bas à droite) */
         .made-with-plot {
             position: absolute;
             bottom: 14px;
@@ -825,6 +887,92 @@
         #captureArea.is-fullscreen .made-with-plot { bottom: 1.15rem; right: 1.5rem; }
         #captureArea.is-fullscreen .chart-source { bottom: 1.15rem; left: 1.5rem; }
 
+        /* --- Modal Embed Interactif --- */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            padding: 1.5rem;
+        }
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            width: 100%;
+            max-width: 540px;
+            padding: 1.5rem 1.75rem;
+            box-shadow: var(--shadow-menu);
+            transform: translateY(10px) scale(0.98);
+            transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .modal-backdrop.open .modal-card {
+            transform: translateY(0) scale(1);
+        }
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+        .modal-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+        }
+        .modal-title svg { width: 18px; height: 18px; }
+        .modal-desc {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            margin: 0 0 1rem 0;
+            line-height: 1.45;
+        }
+        .embed-options-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 0.9rem;
+        }
+        .embed-code-box {
+            width: 100%;
+            height: 92px;
+            padding: 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            line-height: 1.45;
+            resize: none;
+            margin-bottom: 1rem;
+        }
+        .embed-code-box:focus {
+            outline: none;
+            border-color: var(--border-strong);
+        }
+        .modal-footer {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
         /* Toast notification */
         .toast {
             position: fixed;
@@ -879,7 +1027,7 @@
             </button>
             <div class="app-brand">
                 <i data-lucide="bar-chart-2"></i>
-                <span>Plot</span>
+                <span>MyPlot</span>
             </div>
         </div>
         <button class="btn-theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Changer de thème">
@@ -905,25 +1053,39 @@
             <input type="text" id="chartSource" placeholder="Ex: Source : Eurostat, 2026" oninput="onMetaInput()">
         </div>
 
-        <div class="input-group">
-            <label for="chartType">Type de graphique</label>
-            <select id="chartType" onchange="onChartTypeChange()">
-                <optgroup label="Comparaison & Évolution">
-                    <option value="bar">Barres verticales</option>
-                    <option value="bar-horizontal">Barres horizontales</option>
-                    <option value="line">Courbe</option>
-                    <option value="step">Escalier (Step)</option>
-                    <option value="area">Zone</option>
-                    <option value="scatter">Nuage de points</option>
-                    <option value="radar">Radar</option>
-                </optgroup>
-                <optgroup label="Répartition & Proportions">
-                    <option value="donut">Anneau (Donut)</option>
-                    <option value="pie">Camembert (Pie)</option>
-                    <option value="polarArea">Aire polaire</option>
-                    <option value="radialBar">Jauges radiales</option>
-                </optgroup>
-            </select>
+        <div class="input-row-2">
+            <div class="input-group">
+                <label for="chartType">Type de graphique</label>
+                <select id="chartType" onchange="onChartTypeChange()">
+                    <optgroup label="Comparaison & Évolution">
+                        <option value="bar">Barres verticales</option>
+                        <option value="bar-horizontal">Barres horizontales</option>
+                        <option value="line">Courbe</option>
+                        <option value="step">Escalier (Step)</option>
+                        <option value="area">Zone</option>
+                        <option value="scatter">Nuage de points</option>
+                        <option value="radar">Radar</option>
+                    </optgroup>
+                    <optgroup label="Répartition & Proportions">
+                        <option value="donut">Anneau (Donut)</option>
+                        <option value="pie">Camembert (Pie)</option>
+                        <option value="polarArea">Aire polaire</option>
+                        <option value="radialBar">Jauges radiales</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="chartFont">Police du graphique</label>
+                <select id="chartFont" onchange="onFontChange()">
+                    <option value="Inter">Inter (Sans)</option>
+                    <option value="Plus Jakarta Sans">Plus Jakarta</option>
+                    <option value="Playfair Display">Playfair (Éditorial)</option>
+                    <option value="Lora">Lora (Serif)</option>
+                    <option value="Space Grotesk">Space Grotesk</option>
+                    <option value="JetBrains Mono">JetBrains Mono</option>
+                </select>
+            </div>
         </div>
 
         <div class="input-group">
@@ -956,22 +1118,33 @@
         <div class="section-header">
             <div class="section-title">Données</div>
             <div class="section-actions">
-                <button type="button" class="btn-text-subtle" id="sortAscBtn" onclick="sortRows('asc')" title="Trier par ordre croissant">
+                <button type="button" class="btn-text-subtle" id="sortAscBtn" onclick="toggleSortRows('asc')" title="Trier par ordre croissant (recliquer pour annuler)">
                     <i data-lucide="arrow-up-narrow-wide"></i> Croissant
                 </button>
-                <button type="button" class="btn-text-subtle" id="sortDescBtn" onclick="sortRows('desc')" title="Trier par ordre décroissant">
+                <button type="button" class="btn-text-subtle" id="sortDescBtn" onclick="toggleSortRows('desc')" title="Trier par ordre décroissant (recliquer pour annuler)">
                     <i data-lucide="arrow-down-wide-narrow"></i> Décroissant
                 </button>
             </div>
         </div>
         <div id="dataList"></div>
-        <button class="btn-add" onclick="addRow()">+ Nouvelle donnée</button>
+        <input type="file" id="fileImportInput" accept=".csv,.xlsx,.xls,.tsv,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" style="display: none;" onchange="handleFileImport(event)">
+        <div class="data-actions-bar">
+            <button type="button" class="btn-add" onclick="addRow()">
+                <i data-lucide="plus"></i> Nouvelle donnée
+            </button>
+            <button type="button" class="btn-add" onclick="triggerFileImport()" title="Importer un fichier CSV ou Excel (.xlsx)">
+                <i data-lucide="file-spreadsheet"></i> Importer CSV/XLSX
+            </button>
+        </div>
     </aside>
 
     <main class="main-content" id="mainContent">
         <div class="actions">
             <button class="btn-icon" id="fullscreenBtn" onclick="toggleFullscreen()" title="Plein écran">
                 <i data-lucide="maximize"></i>
+            </button>
+            <button class="btn-icon" id="embedBtn" onclick="openEmbedModal()" title="Mode Embed interactif (iframe)">
+                <i data-lucide="code-2"></i>
             </button>
             <button class="btn-icon" id="shareBtn" onclick="copyShareLink()" title="Copier le lien éditable">
                 <i data-lucide="link"></i>
@@ -1042,16 +1215,58 @@
                 <div id="mainChart"></div>
                 <div id="displaySource" class="chart-source"></div>
                 <div class="made-with-plot" aria-hidden="true">
-                    <i data-lucide="layout"></i><span>Made with <b>Plot</b></span>
+                    <i data-lucide="layout"></i><span>Made with <b>MyPlot</b></span>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Modal Mode Embed Interactif -->
+    <div class="modal-backdrop" id="embedModal" onclick="if (event.target === this) closeEmbedModal()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 class="modal-title"><i data-lucide="code-2"></i> Intégrer le graphique (Embed interactif)</h3>
+                <button type="button" class="btn-icon" style="width: 34px; height: 34px;" onclick="closeEmbedModal()" title="Fermer">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+            <p class="modal-desc">
+                Collez ce code dans Notion, Substack, un blog ou votre portfolio pour afficher un graphique interactif au survol, sans aucun serveur.
+            </p>
+            <div class="embed-options-row">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label for="embedThemeSelect">Thème de l'intégration</label>
+                    <select id="embedThemeSelect" onchange="refreshEmbedSnippets()">
+                        <option value="current">Thème actuel</option>
+                        <option value="light">Mode clair forcé</option>
+                        <option value="dark">Mode sombre forcé</option>
+                    </select>
+                </div>
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label for="embedHeightInput">Hauteur iframe (px)</label>
+                    <input type="number" id="embedHeightInput" value="500" min="250" max="1200" step="10" oninput="refreshEmbedSnippets()">
+                </div>
+            </div>
+            <textarea class="embed-code-box" id="embedIframeCode" readonly onclick="this.select()"></textarea>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="previewEmbedMode()">
+                    <i data-lucide="eye"></i> Tester l'embed
+                </button>
+                <button type="button" class="btn-secondary" onclick="copyEmbedDirectUrl()">
+                    <i data-lucide="link"></i> Copier l'URL
+                </button>
+                <button type="button" class="btn-download" onclick="copyEmbedIframeCode()">
+                    <i data-lucide="copy"></i> Copier l'iframe
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
-        const STORAGE_KEY = 'plot-state-v2';
+        const STORAGE_KEY = 'myplot-state-v1';
+        const LEGACY_STORAGE_KEY = 'plot-state-v2';
 
         const VALID_CHART_TYPES = [
             'bar', 'bar-horizontal', 'line', 'step', 'area',
@@ -1060,6 +1275,15 @@
 
         const CIRCULAR_TYPES = ['donut', 'pie', 'polarArea', 'radialBar'];
         const TRENDLINE_TYPES = ['bar', 'line', 'step', 'area', 'scatter'];
+
+        const FONT_OPTIONS = {
+            'Inter': "'Inter', sans-serif",
+            'Plus Jakarta Sans': "'Plus Jakarta Sans', sans-serif",
+            'Playfair Display': "'Playfair Display', Georgia, serif",
+            'Lora': "'Lora', Georgia, serif",
+            'Space Grotesk': "'Space Grotesk', sans-serif",
+            'JetBrains Mono': "'JetBrains Mono', monospace"
+        };
 
         const ASPECT_RATIOS = [
             { id: 'auto', label: 'Auto', ratio: null },
@@ -1106,15 +1330,58 @@
                 name: 'Mono',
                 light: ['#18181b', '#52525b', '#71717a', '#a1a1aa', '#3f3f46', '#d4d4d8'],
                 dark:  ['#fafafa', '#d4d4d8', '#a1a1aa', '#71717a', '#e4e4e7', '#52525b']
+            },
+            {
+                id: 'finance',
+                name: 'Finance',
+                light: ['#1e3a8a', '#059669', '#d97706', '#475569', '#dc2626', '#0284c7'],
+                dark:  ['#60a5fa', '#34d399', '#fbbf24', '#94a3b8', '#f87171', '#38bdf8']
+            },
+            {
+                id: 'terracotta',
+                name: 'Terracotta',
+                light: ['#c2410c', '#d97706', '#65a30d', '#a16207', '#78716c', '#b45309'],
+                dark:  ['#fb923c', '#fbbf24', '#a3e635', '#eab308', '#a8a29e', '#f59e0b']
+            },
+            {
+                id: 'cyber',
+                name: 'Cyber',
+                light: ['#4f46e5', '#06b6d4', '#ec4899', '#10b981', '#8b5cf6', '#eab308'],
+                dark:  ['#818cf8', '#22d3ee', '#f472b6', '#34d399', '#c084fc', '#facc15']
+            },
+            {
+                id: 'pastel',
+                name: 'Pastel',
+                light: ['#818cf8', '#f472b6', '#34d399', '#fbbf24', '#38bdf8', '#fb7185'],
+                dark:  ['#a5b4fc', '#f9a8d4', '#6ee7b7', '#fde68a', '#7dd3fc', '#fda4af']
+            },
+            {
+                id: 'sunset',
+                name: 'Crépuscule',
+                light: ['#4338ca', '#9333ea', '#db2777', '#ea580c', '#f59e0b', '#be123c'],
+                dark:  ['#818cf8', '#c084fc', '#f472b6', '#fb923c', '#fbbf24', '#fb7185']
+            },
+            {
+                id: 'matcha',
+                name: 'Matcha',
+                light: ['#3f6212', '#65a30d', '#84cc16', '#57534e', '#a16207', '#15803d'],
+                dark:  ['#a3e635', '#bef264', '#86efac', '#d6d3d1', '#fde047', '#4ade80']
             }
         ];
 
         let chart = null;
         let currentChartSignature = null;
         let isDarkMode = false;
+        let isEmbedMode = false;
         let toastTimer = null;
         let resizeRenderTimer = null;
         let lastSortDir = null;
+        let unsortedOrderIds = [];
+        let rowIdSeq = 1;
+
+        function nextRowId() {
+            return 'r_' + (rowIdSeq++);
+        }
 
         function getFullscreenElement() {
             return document.fullscreenElement || document.webkitFullscreenElement || null;
@@ -1122,6 +1389,10 @@
 
         function isCircularType(type) {
             return CIRCULAR_TYPES.includes(type);
+        }
+
+        function getFontCss(fontKey) {
+            return FONT_OPTIONS[fontKey] || FONT_OPTIONS['Inter'];
         }
 
         function getPaletteColors(paletteId, dark = isDarkMode) {
@@ -1135,6 +1406,7 @@
                 title: '',
                 source: '',
                 chartType: 'bar',
+                fontFamily: 'Inter',
                 aspectRatio: 'auto',
                 showLegend: true,
                 showLabels: false,
@@ -1148,10 +1420,10 @@
                     { name: 'Valeur', color: cols[0] }
                 ],
                 rows: [
-                    { label: 'Q1', values: [120.5], color: cols[0], hidden: false },
-                    { label: 'Q2', values: [180.0], color: cols[1], hidden: false },
-                    { label: 'Q3', values: [250.75], color: cols[2], hidden: false },
-                    { label: 'Q4', values: [310.2], color: cols[3], hidden: false }
+                    { id: nextRowId(), label: 'Q1', values: [120.5], color: cols[0], hidden: false },
+                    { id: nextRowId(), label: 'Q2', values: [180.0], color: cols[1], hidden: false },
+                    { id: nextRowId(), label: 'Q3', values: [250.75], color: cols[2], hidden: false },
+                    { id: nextRowId(), label: 'Q4', values: [310.2], color: cols[3], hidden: false }
                 ]
             };
         }
@@ -1165,17 +1437,19 @@
             el.className = 'toast' + (isError ? ' error' : '');
             requestAnimationFrame(() => el.classList.add('visible'));
             clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => el.classList.remove('visible'), 2400);
+            toastTimer = setTimeout(() => el.classList.remove('visible'), 2500);
         }
 
         /* --- Encodage / Décodage URL sans backend --- */
-        function encodeStateToHash(st) {
+        function encodeStateToHash(st, overrideDark = null) {
+            const dkVal = overrideDark === null ? (isDarkMode ? 1 : 0) : (overrideDark ? 1 : 0);
             const compact = {
-                v: 3,
-                dk: isDarkMode ? 1 : 0,
+                v: 4,
+                dk: dkVal,
                 t: st.title,
                 so: st.source,
                 ct: st.chartType,
+                fn: st.fontFamily || 'Inter',
                 ar: st.aspectRatio || 'auto',
                 l: st.showLegend ? 1 : 0,
                 dl: st.showLabels ? 1 : 0,
@@ -1204,12 +1478,14 @@
                 throw new Error('Format invalide');
             }
             const validRatio = ASPECT_RATIOS.some(a => a.id === data.ar) ? data.ar : 'auto';
+            const validFont = FONT_OPTIONS[data.fn] ? data.fn : 'Inter';
             return {
                 dark: typeof data.dk === 'number' ? data.dk === 1 : null,
                 state: {
                     title: String(data.t || ''),
                     source: String(data.so || ''),
                     chartType: VALID_CHART_TYPES.includes(data.ct) ? data.ct : 'bar',
+                    fontFamily: validFont,
                     aspectRatio: validRatio,
                     showLegend: Boolean(data.l),
                     showLabels: Boolean(data.dl),
@@ -1224,6 +1500,7 @@
                         color: String(item[1] || '#3b82f6')
                     })),
                     rows: data.r.map(item => ({
+                        id: nextRowId(),
                         label: String(item[0] || ''),
                         values: Array.isArray(item[1]) ? item[1].map(n => Number(n) || 0) : [0],
                         color: String(item[2] || '#3b82f6'),
@@ -1233,7 +1510,21 @@
             };
         }
 
+        function parseUrlParams() {
+            const searchParams = new URLSearchParams(window.location.search);
+            const rawHash = window.location.hash.replace(/^#/, '');
+            const hashParams = new URLSearchParams(rawHash);
+
+            const embedFlag = searchParams.get('embed') === '1' || hashParams.get('embed') === '1';
+            let dataToken = hashParams.get('data');
+            if (!dataToken && rawHash.startsWith('data=')) {
+                dataToken = rawHash.slice(5);
+            }
+            return { embedFlag, dataToken };
+        }
+
         function saveStateToStorage() {
+            if (isEmbedMode) return;
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             } catch (e) {
@@ -1241,16 +1532,38 @@
             }
         }
 
+        function ensureRowIdsAndSanitize() {
+            const count = state.series.length;
+            if (!FONT_OPTIONS[state.fontFamily]) state.fontFamily = 'Inter';
+            if (!VALID_CHART_TYPES.includes(state.chartType)) state.chartType = 'bar';
+            if (!ASPECT_RATIOS.some(a => a.id === state.aspectRatio)) state.aspectRatio = 'auto';
+
+            state.rows.forEach(row => {
+                if (!row.id) row.id = nextRowId();
+                if (!Array.isArray(row.values)) row.values = [0];
+                while (row.values.length < count) row.values.push(0);
+                if (row.values.length > count) row.values = row.values.slice(0, count);
+            });
+            unsortedOrderIds = state.rows.map(r => r.id);
+        }
+
         function loadInitialState() {
-            const hash = window.location.hash;
-            if (hash && hash.startsWith('#data=')) {
+            const { embedFlag, dataToken } = parseUrlParams();
+            isEmbedMode = embedFlag;
+            if (isEmbedMode) {
+                document.body.classList.add('is-embed');
+            }
+
+            if (dataToken) {
                 try {
-                    const decoded = decodeStateFromHash(hash.slice(6));
+                    const decoded = decodeStateFromHash(dataToken);
                     if (decoded.dark !== null) applyTheme(decoded.dark, false);
                     state = decoded.state;
-                    normalizeRowsValues();
-                    saveStateToStorage();
-                    setTimeout(() => showToast('Graphique chargé depuis le lien partagé'), 250);
+                    ensureRowIdsAndSanitize();
+                    if (!isEmbedMode) {
+                        saveStateToStorage();
+                        setTimeout(() => showToast('Graphique chargé depuis le lien partagé'), 250);
+                    }
                     return;
                 } catch (err) {
                     console.warn('Lien partagé invalide:', err);
@@ -1258,14 +1571,12 @@
             }
 
             try {
-                const raw = localStorage.getItem(STORAGE_KEY);
+                const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (parsed && Array.isArray(parsed.series) && parsed.series.length > 0 && Array.isArray(parsed.rows)) {
                         state = { ...createDefaultState(isDarkMode), ...parsed };
-                        if (!VALID_CHART_TYPES.includes(state.chartType)) state.chartType = 'bar';
-                        if (!ASPECT_RATIOS.some(a => a.id === state.aspectRatio)) state.aspectRatio = 'auto';
-                        normalizeRowsValues();
+                        ensureRowIdsAndSanitize();
                         return;
                     }
                 }
@@ -1274,22 +1585,15 @@
             }
 
             state = createDefaultState(isDarkMode);
-        }
-
-        function normalizeRowsValues() {
-            const count = state.series.length;
-            state.rows.forEach(row => {
-                if (!Array.isArray(row.values)) row.values = [0];
-                while (row.values.length < count) row.values.push(0);
-                if (row.values.length > count) row.values = row.values.slice(0, count);
-            });
+            ensureRowIdsAndSanitize();
         }
 
         function resetToDefault() {
             state = createDefaultState(isDarkMode);
+            ensureRowIdsAndSanitize();
             lastSortDir = null;
             updateSortButtonsUI();
-            if (window.location.hash.startsWith('#data=')) {
+            if (window.location.hash) {
                 history.replaceState(null, '', window.location.pathname + window.location.search);
             }
             syncControlsFromState();
@@ -1304,7 +1608,7 @@
 
         /* --- Thème --- */
         function initTheme() {
-            const saved = localStorage.getItem('plot-theme');
+            const saved = localStorage.getItem('myplot-theme') || localStorage.getItem('plot-theme');
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             applyTheme(saved ? saved === 'dark' : prefersDark, false);
         }
@@ -1312,11 +1616,15 @@
         function applyTheme(dark, shouldUpdateChart = true) {
             isDarkMode = dark;
             document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-            localStorage.setItem('plot-theme', dark ? 'dark' : 'light');
+            if (!isEmbedMode) {
+                localStorage.setItem('myplot-theme', dark ? 'dark' : 'light');
+            }
 
             const themeBtn = document.getElementById('themeToggleBtn');
-            themeBtn.innerHTML = `<i data-lucide="${dark ? 'sun' : 'moon'}"></i>`;
-            themeBtn.title = dark ? 'Passer en mode clair' : 'Passer en mode sombre';
+            if (themeBtn) {
+                themeBtn.innerHTML = `<i data-lucide="${dark ? 'sun' : 'moon'}"></i>`;
+                themeBtn.title = dark ? 'Passer en mode clair' : 'Passer en mode sombre';
+            }
 
             if (shouldUpdateChart && state.activePalette) {
                 const cols = getPaletteColors(state.activePalette, dark);
@@ -1347,6 +1655,7 @@
             document.getElementById('chartTitle').value = state.title;
             document.getElementById('chartSource').value = state.source;
             document.getElementById('chartType').value = state.chartType;
+            document.getElementById('chartFont').value = state.fontFamily || 'Inter';
             document.getElementById('showLegend').checked = state.showLegend;
             document.getElementById('showLabels').checked = state.showLabels;
             document.getElementById('showTrendline').checked = state.showTrendline;
@@ -1360,12 +1669,17 @@
             state.title = document.getElementById('chartTitle').value;
             state.source = document.getElementById('chartSource').value;
             updateHeaderAndFooterDOM();
-            if (state.aspectRatio !== 'auto' || getFullscreenElement()) {
+            if (state.aspectRatio !== 'auto' || getFullscreenElement() || isEmbedMode) {
                 applyAspectRatioLayout();
                 scheduleCleanRerender(80);
             } else {
                 saveStateToStorage();
             }
+        }
+
+        function onFontChange() {
+            state.fontFamily = document.getElementById('chartFont').value;
+            updateUI(true);
         }
 
         function onToggleChange(source) {
@@ -1377,7 +1691,6 @@
             state.transparentBg = document.getElementById('transparentBg').checked;
             state.stacked = document.getElementById('stackedMode').checked;
 
-            // Évite le conflit ApexCharts entre mode empilé multi-séries et série mixte de tendance
             if (source === 'trendline' && state.showTrendline && state.stacked && state.series.length > 1) {
                 state.stacked = false;
                 document.getElementById('stackedMode').checked = false;
@@ -1429,7 +1742,7 @@
             const stage = document.getElementById('exportStage');
             const mainEl = document.getElementById('mainContent');
 
-            if (getFullscreenElement()) {
+            if (getFullscreenElement() || isEmbedMode) {
                 stage.style.width = '';
                 stage.style.height = '';
                 stage.style.maxWidth = '';
@@ -1579,13 +1892,34 @@
             updateUI(true);
         }
 
-        /* --- Tri des données (Croissant / Décroissant) --- */
+        /* --- Tri réversible (Croissant / Décroissant / Désélection) --- */
         function updateSortButtonsUI() {
             document.getElementById('sortAscBtn').classList.toggle('active', lastSortDir === 'asc');
             document.getElementById('sortDescBtn').classList.toggle('active', lastSortDir === 'desc');
         }
 
-        function sortRows(direction) {
+        function toggleSortRows(direction) {
+            // Si on reclique sur le bouton déjà actif -> désélection et retour à l'ordre d'origine
+            if (lastSortDir === direction) {
+                const orderMap = new Map(unsortedOrderIds.map((id, idx) => [id, idx]));
+                state.rows.sort((a, b) => {
+                    const ia = orderMap.has(a.id) ? orderMap.get(a.id) : Number.MAX_SAFE_INTEGER;
+                    const ib = orderMap.has(b.id) ? orderMap.get(b.id) : Number.MAX_SAFE_INTEGER;
+                    return ia - ib;
+                });
+                lastSortDir = null;
+                updateSortButtonsUI();
+                renderDataList();
+                updateUI(false);
+                showToast('Tri désactivé (ordre d’origine rétabli)');
+                return;
+            }
+
+            // Sauvegarder l'ordre d'origine avant d'appliquer un tri
+            if (lastSortDir === null) {
+                unsortedOrderIds = state.rows.map(r => r.id);
+            }
+
             const mult = direction === 'asc' ? 1 : -1;
             const useSum = !isCircularType(state.chartType) && state.series.length > 1 && state.stacked;
 
@@ -1686,8 +2020,6 @@
                         valInput.value = rowData.values[sIdx] ?? 0;
                         valInput.oninput = (e) => {
                             state.rows[rIdx].values[sIdx] = Number(e.target.value) || 0;
-                            lastSortDir = null;
-                            updateSortButtonsUI();
                             updateUI(false);
                         };
 
@@ -1732,8 +2064,6 @@
                     valInput.value = rowData.values[0] ?? 0;
                     valInput.oninput = (e) => {
                         state.rows[rIdx].values[0] = Number(e.target.value) || 0;
-                        lastSortDir = null;
-                        updateSortButtonsUI();
                         updateUI(false);
                     };
 
@@ -1770,22 +2100,221 @@
         function addRow() {
             const cols = getPaletteColors(state.activePalette || 'nordic', isDarkMode);
             const nextIdx = state.rows.length;
+            const newId = nextRowId();
             state.rows.push({
+                id: newId,
                 label: `Item ${nextIdx + 1}`,
                 values: state.series.map(() => 0),
                 color: cols[nextIdx % cols.length],
                 hidden: false
             });
-            lastSortDir = null;
-            updateSortButtonsUI();
+            unsortedOrderIds.push(newId);
             renderDataList();
             updateUI(false);
         }
 
         function removeRow(rIdx) {
-            state.rows.splice(rIdx, 1);
+            const removed = state.rows.splice(rIdx, 1)[0];
+            if (removed) {
+                unsortedOrderIds = unsortedOrderIds.filter(id => id !== removed.id);
+            }
             renderDataList();
             updateUI(false);
+        }
+
+        /* --- Import CSV / XLSX --- */
+        function triggerFileImport() {
+            const input = document.getElementById('fileImportInput');
+            input.value = '';
+            input.click();
+        }
+
+        function parseNumberFlexible(raw) {
+            if (typeof raw === 'number') return Number.isFinite(raw) ? raw : NaN;
+            if (raw === null || raw === undefined) return NaN;
+            let s = String(raw).trim();
+            if (!s) return NaN;
+            // Nettoie symboles monétaires, %, espaces insécables
+            s = s.replace(/[€$£¥%\s\u00A0\u202F]/g, '');
+            // Gère séparateurs européens (1.234,56 ou 120,50)
+            if (s.includes(',') && s.includes('.')) {
+                if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
+                    s = s.replace(/\./g, '').replace(',', '.');
+                } else {
+                    s = s.replace(/,/g, '');
+                }
+            } else if (s.includes(',')) {
+                s = s.replace(',', '.');
+            }
+            const num = Number(s);
+            return Number.isFinite(num) ? num : NaN;
+        }
+
+        function parseDelimitedTextFallback(text) {
+            const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+                .split('\n')
+                .filter(line => line.trim() !== '');
+            if (!lines.length) return [];
+
+            const firstLine = lines[0];
+            const semicolons = (firstLine.match(/;/g) || []).length;
+            const commas = (firstLine.match(/,/g) || []).length;
+            const tabs = (firstLine.match(/\t/g) || []).length;
+            const sep = tabs > commas && tabs > semicolons ? '\t' : (semicolons > commas ? ';' : ',');
+
+            return lines.map(line => {
+                const cells = [];
+                let cur = '';
+                let inQuotes = false;
+                for (let i = 0; i < line.length; i++) {
+                    const ch = line[i];
+                    if (ch === '"') {
+                        if (inQuotes && line[i + 1] === '"') {
+                            cur += '"';
+                            i++;
+                        } else {
+                            inQuotes = !inQuotes;
+                        }
+                    } else if (ch === sep && !inQuotes) {
+                        cells.push(cur.trim());
+                        cur = '';
+                    } else {
+                        cur += ch;
+                    }
+                }
+                cells.push(cur.trim());
+                return cells;
+            });
+        }
+
+        function applyImportedMatrix(matrix, fileName) {
+            // Filtre les lignes entièrement vides
+            const cleanRows = matrix
+                .map(row => Array.isArray(row) ? row : [])
+                .filter(row => row.some(cell => cell !== null && cell !== undefined && String(cell).trim() !== ''));
+
+            if (cleanRows.length === 0) {
+                showToast('Le fichier importé est vide', true);
+                return;
+            }
+
+            const maxCols = Math.min(12, Math.max(...cleanRows.map(r => r.length)));
+            if (maxCols < 2) {
+                showToast('Il faut au moins 2 colonnes (Catégorie + Valeur)', true);
+                return;
+            }
+
+            // Détecte si la ligne 0 est un en-tête (aucune valeur numérique dans les colonnes 1..N)
+            const firstRowVals = cleanRows[0].slice(1, maxCols).map(parseNumberFlexible);
+            const hasHeader = cleanRows.length > 1 && firstRowVals.every(v => Number.isNaN(v));
+
+            const headerRow = hasHeader ? cleanRows[0] : null;
+            const dataStartIdx = hasHeader ? 1 : 0;
+            const cols = getPaletteColors(state.activePalette || 'nordic', isDarkMode);
+
+            const seriesCount = maxCols - 1;
+            const newSeries = [];
+            for (let c = 0; c < seriesCount; c++) {
+                const rawName = headerRow && headerRow[c + 1] !== undefined ? String(headerRow[c + 1]).trim() : '';
+                newSeries.push({
+                    name: rawName || `Série ${c + 1}`,
+                    color: cols[c % cols.length]
+                });
+            }
+
+            const newRows = [];
+            for (let r = dataStartIdx; r < cleanRows.length; r++) {
+                const rawRow = cleanRows[r];
+                const label = rawRow[0] !== undefined && rawRow[0] !== null ? String(rawRow[0]).trim() : '';
+                const vals = [];
+                let hasAnyNumber = false;
+                for (let c = 0; c < seriesCount; c++) {
+                    const parsed = parseNumberFlexible(rawRow[c + 1]);
+                    if (!Number.isNaN(parsed)) hasAnyNumber = true;
+                    vals.push(Number.isNaN(parsed) ? 0 : parsed);
+                }
+                if (!label && !hasAnyNumber) continue;
+                newRows.push({
+                    id: nextRowId(),
+                    label: label || `Ligne ${newRows.length + 1}`,
+                    values: vals,
+                    color: cols[newRows.length % cols.length],
+                    hidden: false
+                });
+            }
+
+            if (newRows.length === 0) {
+                showToast('Aucune ligne de données valide détectée', true);
+                return;
+            }
+
+            state.series = newSeries;
+            state.rows = newRows;
+            unsortedOrderIds = state.rows.map(r => r.id);
+            lastSortDir = null;
+            updateSortButtonsUI();
+            renderSeriesList();
+            renderDataList();
+            updateUI(true);
+            showToast(`${newRows.length} ligne${newRows.length > 1 ? 's' : ''} et ${newSeries.length} série${newSeries.length > 1 ? 's' : ''} importées (${fileName})`);
+        }
+
+        async function processImportedFile(file) {
+            if (!file) return;
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            try {
+                if (typeof XLSX !== 'undefined') {
+                    const buffer = await file.arrayBuffer();
+                    const workbook = XLSX.read(buffer, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames.find(name => {
+                        const sheet = workbook.Sheets[name];
+                        return sheet && sheet['!ref'];
+                    }) || workbook.SheetNames[0];
+
+                    if (!firstSheetName) {
+                        showToast('Feuille introuvable dans le fichier', true);
+                        return;
+                    }
+                    const sheet = workbook.Sheets[firstSheetName];
+                    const matrix = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+                    applyImportedMatrix(matrix, file.name);
+                } else if (ext === 'csv' || ext === 'tsv' || ext === 'txt') {
+                    const text = await file.text();
+                    const matrix = parseDelimitedTextFallback(text);
+                    applyImportedMatrix(matrix, file.name);
+                } else {
+                    showToast('Librairie Excel indisponible hors-ligne (utilisez un .csv)', true);
+                }
+            } catch (err) {
+                console.error('Erreur import fichier:', err);
+                showToast('Impossible de lire ce fichier CSV/XLSX', true);
+            }
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files && event.target.files[0];
+            if (file) processImportedFile(file);
+        }
+
+        function setupSidebarDropzone() {
+            const sidebar = document.getElementById('sidebar');
+            ['dragenter', 'dragover'].forEach(evtName => {
+                sidebar.addEventListener(evtName, (e) => {
+                    e.preventDefault();
+                    sidebar.classList.add('drag-over');
+                });
+            });
+            ['dragleave', 'drop'].forEach(evtName => {
+                sidebar.addEventListener(evtName, (e) => {
+                    e.preventDefault();
+                    sidebar.classList.remove('drag-over');
+                });
+            });
+            sidebar.addEventListener('drop', (e) => {
+                const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (file) processImportedFile(file);
+            });
         }
 
         /* --- Calculs statistiques : Régression linéaire & Moyenne --- */
@@ -1826,7 +2355,7 @@
             return all.length ? all.reduce((a, b) => a + b, 0) / all.length : null;
         }
 
-        /* --- Hauteur dynamique (Plein écran, Ratio fixe, ou Auto) --- */
+        /* --- Hauteur dynamique (Plein écran, Embed, Ratio fixe, ou Auto) --- */
         function getChartHeight() {
             const titleEl = document.getElementById('displayTitle');
             const avgEl = document.getElementById('avgBadge');
@@ -1834,6 +2363,11 @@
             const hasAvgBadge = avgEl && avgEl.style.display !== 'none';
             const titleHeight = hasTitle ? (titleEl.offsetHeight + 20) : 0;
             const avgHeight = hasAvgBadge ? (avgEl.offsetHeight + 12) : 0;
+
+            if (isEmbedMode) {
+                const containerPadding = 94;
+                return Math.max(220, Math.floor(window.innerHeight - containerPadding - titleHeight - avgHeight));
+            }
 
             if (getFullscreenElement()) {
                 const verticalChrome = (window.innerHeight * 0.02) + 52;
@@ -1843,7 +2377,7 @@
             if (state.aspectRatio !== 'auto') {
                 const stage = document.getElementById('exportStage');
                 const stageH = stage.clientHeight || 480;
-                const containerPadding = 94; // 2.5rem haut + 3.4rem bas
+                const containerPadding = 94;
                 return Math.max(200, Math.floor(stageH - containerPadding - titleHeight - avgHeight));
             }
 
@@ -1856,6 +2390,7 @@
             const labels = visibleRows.map(r => r.label);
             const rowColors = visibleRows.map(r => r.color);
             const type = state.chartType;
+            const fontCss = getFontCss(state.fontFamily);
 
             const isCirc = isCircularType(type);
             const isHorizontalBar = (type === 'bar-horizontal');
@@ -1886,18 +2421,15 @@
                 return Number.isFinite(num) ? num.toFixed(2) : '0.00';
             };
 
-            // Type interne ApexCharts
             let apexChartType = type;
             if (isHorizontalBar) apexChartType = 'bar';
             if (type === 'step') apexChartType = 'line';
-            if (canTrendline) apexChartType = 'line'; // Mode mixte propre pour combiner bar/area/scatter + trendline
+            if (canTrendline) apexChartType = 'line';
 
-            // Valeurs radialBar normalisées sur 0-100 tout en affichant les vraies valeurs
             const rawRadialValues = visibleRows.map(r => Math.max(0, Number(r.values[0]) || 0));
             const maxRadialVal = Math.max(...rawRadialValues, 0);
             const radialScaleMax = maxRadialVal > 100 ? maxRadialVal * 1.12 : 100;
 
-            // Construction des séries
             let apexSeries;
             if (isRadialBar) {
                 apexSeries = rawRadialValues.map(v => Number(((v / radialScaleMax) * 100).toFixed(1)));
@@ -1922,7 +2454,6 @@
                 }));
             }
 
-            // Ajout de la courbe de tendance (régression linéaire)
             if (canTrendline) {
                 const baseYs = visibleRows.map(r => {
                     if (state.series.length === 1) return Number(r.values[0]) || 0;
@@ -1944,7 +2475,6 @@
                 ? rowColors
                 : (canTrendline ? [...seriesColors, trendColor] : seriesColors);
 
-            // Stroke configuration
             let strokeOptions;
             if (canTrendline) {
                 const dataWidth = (isVerticalBar || isScatter) ? 0 : 3;
@@ -1971,15 +2501,10 @@
                     width: 2.5,
                     colors: seriesColors
                 };
-            } else if (isScatter) {
-                strokeOptions = { show: false, width: 0 };
-            } else if (isCirc) {
-                strokeOptions = { show: false, width: 0 };
             } else {
                 strokeOptions = { show: false, width: 0 };
             }
 
-            // Fill configuration
             let fillOptions;
             if (isArea && canTrendline) {
                 fillOptions = {
@@ -2010,7 +2535,6 @@
                 fillOptions = { type: 'solid', opacity: 1 };
             }
 
-            // Markers configuration
             let markersOptions;
             if (canTrendline) {
                 const dataSize = isVerticalBar ? 0 : (isScatter ? 7 : 5);
@@ -2038,7 +2562,6 @@
                 markersOptions = { size: 0 };
             }
 
-            // Annotations pour la ligne de moyenne (cartésien vertical & horizontal)
             const annotations = { yaxis: [], xaxis: [] };
             if (avgValue !== null && !isCirc && !isRadar) {
                 const avgConfig = {
@@ -2052,7 +2575,7 @@
                             background: avgColor,
                             fontSize: '11px',
                             fontWeight: 700,
-                            fontFamily: 'Inter, sans-serif',
+                            fontFamily: fontCss,
                             padding: { left: 8, right: 8, top: 3, bottom: 3 }
                         },
                         text: `Moyenne : ${formatDecimals(avgValue)}`
@@ -2073,14 +2596,13 @@
                 }
             }
 
-            // Axes X / Y (inversion propre pour les barres horizontales)
             const xaxisOptions = isHorizontalBar
                 ? {
                     axisBorder: { color: gridColor },
                     axisTicks: { color: gridColor },
                     labels: {
                         formatter: formatDecimals,
-                        style: { colors: textColor, fontSize: '12px' }
+                        style: { colors: textColor, fontSize: '12px', fontFamily: fontCss }
                     }
                 }
                 : (isSingleSeriesBar
@@ -2088,27 +2610,26 @@
                         type: 'category',
                         axisBorder: { color: gridColor },
                         axisTicks: { color: gridColor },
-                        labels: { style: { colors: textColor, fontSize: '12px' } }
+                        labels: { style: { colors: textColor, fontSize: '12px', fontFamily: fontCss } }
                     }
                     : {
                         categories: labels,
                         axisBorder: { color: gridColor },
                         axisTicks: { color: gridColor },
-                        labels: { style: { colors: textColor, fontSize: '12px' } }
+                        labels: { style: { colors: textColor, fontSize: '12px', fontFamily: fontCss } }
                     });
 
             const yaxisOptions = isHorizontalBar
                 ? {
-                    labels: { style: { colors: textColor, fontSize: '12px' } }
+                    labels: { style: { colors: textColor, fontSize: '12px', fontFamily: fontCss } }
                 }
                 : {
                     labels: {
                         formatter: formatDecimals,
-                        style: { colors: textColor, fontSize: '12px' }
+                        style: { colors: textColor, fontSize: '12px', fontFamily: fontCss }
                     }
                 };
 
-            // DataLabels (ne pas encombrer la courbe de tendance)
             const enabledOnSeries = canTrendline
                 ? Array.from({ length: dataSeriesCount }, (_, i) => i)
                 : undefined;
@@ -2123,7 +2644,7 @@
                     foreColor: textColor,
                     toolbar: { show: false },
                     zoom: { enabled: false },
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: fontCss,
                     animations: { enabled: animate, speed: 350 },
                     dropShadow: { enabled: false }
                 },
@@ -2144,6 +2665,7 @@
                 yaxis: yaxisOptions,
                 tooltip: {
                     theme: isDarkMode ? 'dark' : 'light',
+                    style: { fontFamily: fontCss },
                     shared: (isMultiSeries || canTrendline) && !isCirc && !isScatter && !isRadar,
                     intersect: isScatter,
                     y: {
@@ -2157,7 +2679,7 @@
                     showForSingleSeries: true,
                     position: 'bottom',
                     fontSize: '13px',
-                    fontFamily: 'Inter, sans-serif',
+                    fontFamily: fontCss,
                     offsetY: 6,
                     labels: { colors: strongTextColor }
                 },
@@ -2173,7 +2695,7 @@
                     offsetY: (isLine || isArea || isScatter) ? -10 : (isVerticalBar && !canStack ? -20 : 0),
                     style: {
                         fontSize: '12px',
-                        fontFamily: 'Inter, sans-serif',
+                        fontFamily: fontCss,
                         fontWeight: 600,
                         colors: (isCirc || canStack) ? ['#ffffff'] : [strongTextColor]
                     },
@@ -2194,12 +2716,13 @@
                             size: '70%',
                             labels: {
                                 show: type === 'donut',
-                                name: { show: true, color: textColor, fontSize: '13px' },
+                                name: { show: true, color: textColor, fontSize: '13px', fontFamily: fontCss },
                                 value: {
                                     show: true,
                                     color: strongTextColor,
                                     fontSize: '20px',
                                     fontWeight: 700,
+                                    fontFamily: fontCss,
                                     formatter: formatDecimals
                                 },
                                 total: {
@@ -2208,6 +2731,7 @@
                                     color: textColor,
                                     fontSize: '13px',
                                     fontWeight: 600,
+                                    fontFamily: fontCss,
                                     formatter: (w) => {
                                         const sum = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
                                         return formatDecimals(sum);
@@ -2234,12 +2758,13 @@
                             strokeWidth: '100%'
                         },
                         dataLabels: {
-                            name: { show: true, fontSize: '13px', color: textColor },
+                            name: { show: true, fontSize: '13px', color: textColor, fontFamily: fontCss },
                             value: {
                                 show: true,
                                 fontSize: '18px',
                                 fontWeight: 700,
                                 color: strongTextColor,
+                                fontFamily: fontCss,
                                 formatter: (pct) => {
                                     const approx = (Number(pct) / 100) * radialScaleMax;
                                     return formatDecimals(approx);
@@ -2251,6 +2776,7 @@
                                 color: textColor,
                                 fontSize: '13px',
                                 fontWeight: 600,
+                                fontFamily: fontCss,
                                 formatter: () => formatDecimals(rawRadialValues.reduce((a, b) => a + b, 0))
                             }
                         }
@@ -2260,6 +2786,9 @@
         }
 
         function updateHeaderAndFooterDOM() {
+            const captureArea = document.getElementById('captureArea');
+            captureArea.style.setProperty('--chart-font', getFontCss(state.fontFamily));
+
             const displayTitle = document.getElementById('displayTitle');
             if (state.title.trim() !== '') {
                 displayTitle.textContent = state.title;
@@ -2278,7 +2807,6 @@
                 displaySource.style.display = 'none';
             }
 
-            // Badge moyenne pour les graphiques sans axe cartésien (circulaires & radar)
             const avgBadge = document.getElementById('avgBadge');
             const showNonCartesianAvg = state.showAverage && (isCircularType(state.chartType) || state.chartType === 'radar');
             if (showNonCartesianAvg) {
@@ -2295,14 +2823,13 @@
             }
 
             const stage = document.getElementById('exportStage');
-            const captureArea = document.getElementById('captureArea');
             stage.classList.toggle('checkerboard', state.transparentBg);
             captureArea.classList.toggle('is-transparent', state.transparentBg);
             captureArea.classList.toggle('has-shadows', state.showShadows);
         }
 
         function getChartSignature() {
-            return `${state.chartType}|${state.showTrendline}|${state.stacked}|${state.series.length}`;
+            return `${state.chartType}|${state.fontFamily}|${state.showTrendline}|${state.stacked}|${state.series.length}`;
         }
 
         function renderChart(animate = true) {
@@ -2373,10 +2900,80 @@
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
 
         window.addEventListener('resize', () => {
-            if (getFullscreenElement() || state.aspectRatio !== 'auto') {
+            if (getFullscreenElement() || state.aspectRatio !== 'auto' || isEmbedMode) {
                 scheduleCleanRerender(140);
             }
         });
+
+        /* --- Mode Embed Interactif (Modal & Snippets) --- */
+        function buildEmbedUrl() {
+            const themeChoice = document.getElementById('embedThemeSelect').value;
+            const overrideDark = themeChoice === 'light' ? false : (themeChoice === 'dark' ? true : null);
+            const encoded = encodeStateToHash(state, overrideDark);
+            const baseUrl = window.location.href.split('?')[0].split('#')[0];
+            return `${baseUrl}?embed=1#embed=1&data=${encoded}`;
+        }
+
+        function refreshEmbedSnippets() {
+            const url = buildEmbedUrl();
+            const h = Math.max(250, Math.min(1200, Number(document.getElementById('embedHeightInput').value) || 500));
+            const titleAttr = (state.title.trim() || 'Graphique MyPlot').replace(/"/g, '&quot;');
+            const borderStyle = state.transparentBg ? 'border: none; background: transparent;' : 'border-radius: 16px; border: 1px solid rgba(0, 0, 0, 0.08);';
+            document.getElementById('embedIframeCode').value =
+                `<iframe src="${url}" title="${titleAttr}" width="100%" height="${h}" frameborder="0" style="${borderStyle}"></iframe>`;
+        }
+
+        function openEmbedModal() {
+            refreshEmbedSnippets();
+            document.getElementById('embedModal').classList.add('open');
+            lucide.createIcons();
+        }
+
+        function closeEmbedModal() {
+            document.getElementById('embedModal').classList.remove('open');
+        }
+
+        async function copyTextSafe(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+            }
+        }
+
+        async function copyEmbedIframeCode() {
+            try {
+                const code = document.getElementById('embedIframeCode').value;
+                await copyTextSafe(code);
+                showToast('Code <iframe> interactif copié !');
+            } catch (err) {
+                console.error(err);
+                showToast('Impossible de copier le code iframe', true);
+            }
+        }
+
+        async function copyEmbedDirectUrl() {
+            try {
+                const url = buildEmbedUrl();
+                await copyTextSafe(url);
+                showToast('URL Embed interactive copiée !');
+            } catch (err) {
+                console.error(err);
+                showToast('Impossible de copier l’URL embed', true);
+            }
+        }
+
+        function previewEmbedMode() {
+            const url = buildEmbedUrl();
+            window.open(url, '_blank', 'noopener');
+        }
 
         /* --- Menu Export Multi-formats --- */
         function toggleExportMenu(e) {
@@ -2395,12 +2992,15 @@
         });
 
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeExportMenu();
+            if (e.key === 'Escape') {
+                closeExportMenu();
+                closeEmbedModal();
+            }
         });
 
         function getBaseFileName() {
             const cleanTitle = state.title.trim().replace(/[^a-zA-Z0-9À-ÿ_-]+/g, '-').replace(/^-+|-+$/g, '');
-            return cleanTitle ? `Plot-${cleanTitle}` : 'Plot-Graphique';
+            return cleanTitle ? `MyPlot-${cleanTitle}` : 'MyPlot-Graphique';
         }
 
         function captureChartCanvas(forceOpaque = false) {
@@ -2462,6 +3062,7 @@
             const rect = svgEl.getBoundingClientRect();
             const chartW = Math.ceil(Number(svgEl.getAttribute('width')) || rect.width || 760);
             const chartH = Math.ceil(Number(svgEl.getAttribute('height')) || rect.height || 420);
+            const fontCss = getFontCss(state.fontFamily);
 
             const padX = 40;
             const hasTitle = state.title.trim() !== '';
@@ -2482,7 +3083,7 @@
             outer.setAttribute('width', String(totalW));
             outer.setAttribute('height', String(totalH));
             outer.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
-            outer.style.fontFamily = 'Inter, -apple-system, BlinkMacSystemFont, sans-serif';
+            outer.style.fontFamily = fontCss;
 
             if (!state.transparentBg) {
                 const bg = document.createElementNS(NS, 'rect');
@@ -2501,7 +3102,7 @@
                 titleNode.setAttribute('fill', titleColor);
                 titleNode.setAttribute('font-size', '22');
                 titleNode.setAttribute('font-weight', '700');
-                titleNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
+                titleNode.setAttribute('font-family', fontCss);
                 titleNode.textContent = state.title.trim();
                 outer.appendChild(titleNode);
             }
@@ -2514,7 +3115,7 @@
                 avgNode.setAttribute('fill', isDarkMode ? '#38bdf8' : '#0284c7');
                 avgNode.setAttribute('font-size', '13');
                 avgNode.setAttribute('font-weight', '600');
-                avgNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
+                avgNode.setAttribute('font-family', fontCss);
                 avgNode.textContent = document.getElementById('avgBadge').textContent;
                 outer.appendChild(avgNode);
             }
@@ -2533,7 +3134,7 @@
                 srcNode.setAttribute('fill', mutedColor);
                 srcNode.setAttribute('font-size', '12');
                 srcNode.setAttribute('font-weight', '500');
-                srcNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
+                srcNode.setAttribute('font-family', fontCss);
                 srcNode.textContent = state.source.trim();
                 outer.appendChild(srcNode);
             }
@@ -2545,8 +3146,8 @@
             brandNode.setAttribute('fill', mutedColor);
             brandNode.setAttribute('font-size', '11');
             brandNode.setAttribute('font-weight', '700');
-            brandNode.setAttribute('font-family', 'Inter, -apple-system, sans-serif');
-            brandNode.textContent = 'MADE WITH PLOT';
+            brandNode.setAttribute('font-family', fontCss);
+            brandNode.textContent = 'MADE WITH MYPLOT';
             outer.appendChild(brandNode);
 
             return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(outer);
@@ -2651,20 +3252,10 @@
 
             try {
                 const encoded = encodeStateToHash(state);
-                const shareUrl = `${window.location.href.split('#')[0]}#data=${encoded}`;
+                const baseUrl = window.location.href.split('?')[0].split('#')[0];
+                const shareUrl = `${baseUrl}#data=${encoded}`;
 
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(shareUrl);
-                } else {
-                    const ta = document.createElement('textarea');
-                    ta.value = shareUrl;
-                    ta.style.position = 'fixed';
-                    ta.style.opacity = '0';
-                    document.body.appendChild(ta);
-                    ta.select();
-                    document.execCommand('copy');
-                    ta.remove();
-                }
+                await copyTextSafe(shareUrl);
 
                 btn.innerHTML = '<i data-lucide="check"></i>';
                 lucide.createIcons();
@@ -2684,11 +3275,14 @@
         function init() {
             initTheme();
             loadInitialState();
-            syncControlsFromState();
-            renderRatios();
-            renderPalettes();
-            renderSeriesList();
-            renderDataList();
+            if (!isEmbedMode) {
+                syncControlsFromState();
+                renderRatios();
+                renderPalettes();
+                renderSeriesList();
+                renderDataList();
+                setupSidebarDropzone();
+            }
             lucide.createIcons();
             renderChart(true);
         }
