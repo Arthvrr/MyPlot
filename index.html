@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plot — Graphiques Modernes</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            color-scheme: light;
+            --primary: #09090b;
+            --primary-fg: #ffffff;
+            --bg: #f5f5f7;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #ffffff 0%, #f5f5f7 100%);
+            --card: #ffffff;
+            --card-hover: #f4f4f5;
+            --text-main: #18181b;
+            --text-muted: #71717a;
+            --border: rgba(0, 0, 0, 0.08);
+            --border-strong: rgba(0, 0, 0, 0.16);
+            --input-bg: #fafafa;
+            --input-focus-bg: #ffffff;
+            --input-focus-ring: rgba(0, 0, 0, 0.06);
+            --add-bg: #f5f5f7;
+            --add-border: #d2d2d7;
+            --add-hover: #e8e8ed;
+            --danger-bg: #fff0f0;
+            --danger-hover: #ffe5e5;
+            --danger-fg: #ef4444;
+            --badge-bg: rgba(255, 255, 255, 0.85);
+            --shadow-card: 0 20px 40px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-primary: 0 8px 16px rgba(0, 0, 0, 0.15);
+            --radius-lg: 24px;
+            --radius-md: 12px;
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --primary: #fafafa;
+            --primary-fg: #09090b;
+            --bg: #09090b;
+            --bg-gradient: radial-gradient(circle at 50% 0%, #17171c 0%, #09090b 100%);
+            --card: #121216;
+            --card-hover: #1e1e24;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --border: rgba(255, 255, 255, 0.09);
+            --border-strong: rgba(255, 255, 255, 0.18);
+            --input-bg: #18181d;
+            --input-focus-bg: #1f1f26;
+            --input-focus-ring: rgba(255, 255, 255, 0.08);
+            --add-bg: #18181d;
+            --add-border: rgba(255, 255, 255, 0.16);
+            --add-hover: #222229;
+            --danger-bg: rgba(239, 68, 68, 0.12);
+            --danger-hover: rgba(239, 68, 68, 0.22);
+            --danger-fg: #f87171;
+            --badge-bg: rgba(24, 24, 29, 0.85);
+            --shadow-card: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
+            --shadow-btn: 0 4px 14px rgba(0, 0, 0, 0.45);
+            --shadow-primary: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* --- Top-bar : Repli + Plot à gauche, Toggle Dark Mode à droite du panel --- */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 420px;
+            padding: 1.5rem 2rem 1rem 1.5rem;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: linear-gradient(to bottom, var(--card) 75%, transparent);
+            pointer-events: none;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease;
+        }
+
+        .top-bar > * {
+            pointer-events: auto;
+        }
+
+        body.sidebar-collapsed .top-bar {
+            width: auto;
+            background: transparent;
+            gap: 16px;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-toggle-sidebar,
+        .btn-theme-toggle {
+            background: var(--card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            box-shadow: var(--shadow-btn);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-toggle-sidebar:hover,
+        .btn-theme-toggle:hover {
+            background: var(--card-hover);
+            border-color: var(--border-strong);
+            transform: scale(1.05);
+        }
+
+        .btn-toggle-sidebar svg,
+        .btn-theme-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .app-brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .app-brand svg { width: 22px; height: 22px; color: var(--text-main); }
+        .app-brand span {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 420px;
+            flex-shrink: 0;
+            background: var(--card);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            padding-top: 5rem;
+            overflow-y: auto;
+            z-index: 10;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s ease, border-color 0.25s ease;
+        }
+        .sidebar.hidden { margin-left: -420px; }
+
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+
+        .section-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin: 1.5rem 0 1rem 0;
+        }
+        .section-title:first-child { margin-top: 0.5rem; }
+
+        .input-group { margin-bottom: 1.2rem; }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 0.55rem;
+            color: var(--text-main);
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            background: var(--input-bg);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--border-strong);
+            background: var(--input-focus-bg);
+            box-shadow: 0 0 0 4px var(--input-focus-ring);
+        }
+
+        .toggles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.45rem 0;
+            margin-bottom: 0;
+            color: var(--text-main);
+        }
+        .toggle-container input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .data-row {
+            display: grid;
+            grid-template-columns: 36px 1fr 90px 32px 36px;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .data-row.hidden-row { opacity: 0.45; filter: grayscale(0.5); }
+
+        input[type="color"] {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            background: var(--input-bg);
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 3px; }
+        input[type="color"]::-webkit-color-swatch { border-radius: 5px; border: none; }
+
+        .hide-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            justify-self: center;
+            accent-color: var(--primary);
+        }
+
+        .btn-add {
+            background: var(--add-bg);
+            border: 1px dashed var(--add-border);
+            padding: 0.8rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-add:hover { background: var(--add-hover); }
+
+        .btn-remove {
+            background: var(--danger-bg);
+            color: var(--danger-fg);
+            border: none;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .btn-remove:hover { background: var(--danger-hover); }
+
+        /* --- Main --- */
+        .main-content {
+            flex-grow: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+            position: relative;
+            background: var(--bg-gradient);
+            transition: background 0.25s ease;
+        }
+
+        .export-container {
+            background: var(--card);
+            padding: 3rem 3rem 4rem 3rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            width: 100%;
+            max-width: 900px;
+            border: 1px solid var(--border);
+            position: relative;
+            transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .export-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+            margin-top: 0;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        #mainChart {
+            width: 100%;
+        }
+
+        /* Badge Made With Plot */
+        .made-with-plot {
+            position: absolute;
+            bottom: 14px;
+            right: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: var(--badge-bg);
+            backdrop-filter: blur(10px);
+            padding: 5px 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-btn);
+            pointer-events: none;
+            z-index: 30;
+            text-transform: uppercase;
+            user-select: none;
+        }
+        .made-with-plot svg {
+            width: 12px;
+            height: 12px;
+            stroke: var(--text-main);
+            fill: none;
+        }
+        .made-with-plot span { color: var(--text-muted); }
+        .made-with-plot b { color: var(--text-main); }
+
+        /* Actions */
+        .actions {
+            position: absolute;
+            top: 1.5rem;
+            right: 2rem;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            z-index: 40;
+        }
+
+        .btn-download {
+            background: var(--primary);
+            color: var(--primary-fg);
+            border: none;
+            padding: 0.75rem 1.4rem;
+            height: 40px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            box-shadow: var(--shadow-primary);
+        }
+        .btn-download:hover { transform: translateY(-2px); opacity: 0.92; }
+        .btn-download svg { width: 16px; height: 16px; }
+
+        .btn-icon {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-btn);
+        }
+        .btn-icon:hover {
+            background: var(--card-hover);
+            transform: scale(1.05);
+            border-color: var(--border-strong);
+        }
+        .btn-icon svg { width: 18px; height: 18px; }
+        .btn-icon.fullscreen-active {
+            background: var(--primary);
+            color: var(--primary-fg);
+            border-color: var(--primary);
+        }
+
+        /* Bouton de sortie discret visible uniquement en plein écran */
+        .btn-exit-fullscreen {
+            display: none;
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            z-index: 40;
+        }
+
+        /* Plein écran : >= 90% largeur et hauteur disponibles */
+        #captureArea::backdrop {
+            background: var(--card);
+        }
+
+        #captureArea.is-fullscreen {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            max-width: none;
+            border-radius: 0;
+            box-shadow: none;
+            border: none;
+            padding: 2vh 3vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--card);
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        #captureArea.is-fullscreen .btn-exit-fullscreen {
+            display: flex;
+        }
+
+        #captureArea.is-fullscreen .export-title {
+            margin-bottom: 1rem;
+            flex-shrink: 0;
+        }
+
+        #captureArea.is-fullscreen #mainChart {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+        }
+
+        #captureArea.is-fullscreen .made-with-plot {
+            bottom: 1.25rem;
+            right: 1.5rem;
+        }
+
+        /* ApexCharts Tooltip polish en mode sombre */
+        [data-theme="dark"] .apexcharts-tooltip {
+            background: #18181d !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6) !important;
+        }
+        [data-theme="dark"] .apexcharts-tooltip-title {
+            background: #121216 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        }
+
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <button class="btn-toggle-sidebar" onclick="toggleSidebar()" title="Masquer/Afficher le menu">
+                <i data-lucide="panel-left"></i>
+            </button>
+            <div class="app-brand">
+                <i data-lucide="bar-chart-2"></i>
+                <span>Plot</span>
+            </div>
+        </div>
+        <button class="btn-theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Changer de thème">
+            <i data-lucide="moon"></i>
+        </button>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="section-title">Personnalisation</div>
+
+        <div class="input-group">
+            <label>Titre du graphique</label>
+            <input type="text" id="chartTitle" placeholder="Ex: Évolution des revenus" oninput="updateUI()">
+        </div>
+
+        <div class="input-group">
+            <label>Nom de la série (Légende)</label>
+            <input type="text" id="seriesName" placeholder="Ex: Valeur en €" value="Valeur" oninput="updateUI()">
+        </div>
+
+        <div class="input-group">
+            <label>Type de graphique</label>
+            <select id="chartType" onchange="updateUI()">
+                <option value="bar">Barres</option>
+                <option value="line">Courbe</option>
+                <option value="area">Zone</option>
+                <option value="donut">Anneau</option>
+            </select>
+        </div>
+
+        <div class="toggles-grid">
+            <label class="toggle-container"><input type="checkbox" id="showLegend" checked onchange="updateUI()"> <span>Légende</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showLabels" onchange="updateUI()"> <span>Valeurs</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showBorders" onchange="updateUI()"> <span>Bordures</span></label>
+            <label class="toggle-container"><input type="checkbox" id="showShadows" onchange="updateUI()"> <span>Ombres</span></label>
+        </div>
+
+        <div class="section-title">Données</div>
+        <div id="dataList"></div>
+        <button class="btn-add" onclick="addRow()">+ Nouvelle donnée</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="actions">
+            <button class="btn-icon" id="fullscreenBtn" onclick="toggleFullscreen()" title="Plein écran">
+                <i data-lucide="maximize"></i>
+            </button>
+            <button class="btn-download" id="downloadBtn" onclick="exportHD()">
+                <i data-lucide="download"></i> Exporter HD
+            </button>
+        </div>
+
+        <div class="export-container" id="captureArea">
+            <button class="btn-icon btn-exit-fullscreen" onclick="toggleFullscreen()" title="Quitter le plein écran" data-html2canvas-ignore="true">
+                <i data-lucide="minimize"></i>
+            </button>
+            <h2 id="displayTitle" class="export-title"></h2>
+            <div id="mainChart"></div>
+            <div class="made-with-plot" aria-hidden="true">
+                <i data-lucide="layout"></i><span>Made with <b>Plot</b></span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let chart = null;
+        let currentChartType = null;
+        let isDarkMode = false;
+
+        const defaultColorsLight = ['#18181b', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+        const defaultColorsDark = ['#f4f4f5', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#a78bfa'];
+        let colorIndex = 0;
+
+        const defaultData = [
+            { label: 'Q1', value: 120.5 },
+            { label: 'Q2', value: 180.0 },
+            { label: 'Q3', value: 250.75 },
+            { label: 'Q4', value: 310.2 }
+        ];
+
+        function initTheme() {
+            const saved = localStorage.getItem('plot-theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(saved ? saved === 'dark' : prefersDark, false);
+        }
+
+        function applyTheme(dark, shouldUpdateChart = true) {
+            isDarkMode = dark;
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+            localStorage.setItem('plot-theme', dark ? 'dark' : 'light');
+
+            const themeBtn = document.getElementById('themeToggleBtn');
+            themeBtn.innerHTML = `<i data-lucide="${dark ? 'sun' : 'moon'}"></i>`;
+            themeBtn.title = dark ? 'Passer en mode clair' : 'Passer en mode sombre';
+
+            // Adapte automatiquement les couleurs par défaut non modifiées (noir <-> blanc)
+            document.querySelectorAll('input[type="color"][data-auto-mono="true"]').forEach(input => {
+                input.value = dark ? defaultColorsDark[0] : defaultColorsLight[0];
+            });
+
+            lucide.createIcons();
+            if (shouldUpdateChart && chart) updateUI(true);
+        }
+
+        function toggleTheme() {
+            applyTheme(!isDarkMode, true);
+        }
+
+        function init() {
+            initTheme();
+            defaultData.forEach(d => addRow(d.label, d.value, false));
+            lucide.createIcons();
+            renderChart();
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('hidden');
+            document.body.classList.toggle('sidebar-collapsed', sidebar.classList.contains('hidden'));
+            setTimeout(() => { if (chart) chart.windowResize(); }, 320);
+        }
+
+        function addRow(label = '', value = '', shouldUpdate = true) {
+            const container = document.getElementById('dataList');
+            const row = document.createElement('div');
+            row.className = 'data-row';
+
+            const idx = colorIndex % defaultColorsLight.length;
+            const isAutoMono = (idx === 0);
+            const assignedColor = isDarkMode ? defaultColorsDark[idx] : defaultColorsLight[idx];
+            colorIndex++;
+
+            row.innerHTML = `
+                <input type="color" value="${assignedColor}" ${isAutoMono ? 'data-auto-mono="true"' : ''} oninput="this.removeAttribute('data-auto-mono'); updateUI()">
+                <input type="text" placeholder="Nom" value="${label}" oninput="updateUI()">
+                <input type="number" placeholder="Valeur" value="${value}" step="0.01" oninput="updateUI()">
+                <input type="checkbox" class="hide-checkbox" onchange="updateUI()" title="Masquer cette donnée">
+                <button class="btn-remove" onclick="this.parentElement.remove(); updateUI();"><i data-lucide="x" style="width: 16px;"></i></button>
+            `;
+            container.appendChild(row);
+            lucide.createIcons();
+            if (shouldUpdate) updateUI();
+        }
+
+        function getData() {
+            const rows = document.querySelectorAll('.data-row');
+            const labels = [], values = [], colors = [];
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const hideCheckbox = inputs[3];
+                if (hideCheckbox && hideCheckbox.checked) {
+                    row.classList.add('hidden-row');
+                    return;
+                }
+                row.classList.remove('hidden-row');
+                if (inputs[1].value.trim() !== '') {
+                    colors.push(inputs[0].value);
+                    labels.push(inputs[1].value);
+                    values.push(Number(inputs[2].value) || 0);
+                } else {
+                    row.classList.add('hidden-row');
+                }
+            });
+            return { labels, values, colors };
+        }
+
+        function getChartHeight() {
+            if (document.fullscreenElement) {
+                const titleEl = document.getElementById('displayTitle');
+                const hasTitle = titleEl && titleEl.style.display !== 'none' && titleEl.textContent.trim() !== '';
+                const titleHeight = hasTitle ? (titleEl.offsetHeight + 16) : 0;
+                const verticalPadding = window.innerHeight * 0.04; // 2vh haut + 2vh bas
+                return Math.max(320, Math.floor(window.innerHeight - verticalPadding - titleHeight));
+            }
+            return 420;
+        }
+
+        function buildChartOptions() {
+            const { labels, values, colors } = getData();
+            const type = document.getElementById('chartType').value;
+            const seriesName = document.getElementById('seriesName').value || 'Valeur';
+            const showLegend = document.getElementById('showLegend').checked;
+            const showLabels = document.getElementById('showLabels').checked;
+            const showBorders = document.getElementById('showBorders').checked;
+            const showShadows = document.getElementById('showShadows').checked;
+
+            const isCircular = (type === 'donut');
+            const isLineOrArea = (type === 'line' || type === 'area');
+            const primarySeriesColor = colors[0] || (isDarkMode ? '#f4f4f5' : '#18181b');
+            const textColor = isDarkMode ? '#a1a1aa' : '#52525b';
+            const strongTextColor = isDarkMode ? '#f4f4f5' : '#18181b';
+            const cardBg = isDarkMode ? '#121216' : '#ffffff';
+            const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9';
+
+            const formatDecimals = val => Number(val).toFixed(2);
+
+            let strokeOptions;
+            if (isLineOrArea) {
+                strokeOptions = {
+                    show: true,
+                    curve: 'smooth',
+                    width: 3,
+                    lineCap: 'round',
+                    colors: [primarySeriesColor]
+                };
+            } else if (isCircular) {
+                strokeOptions = {
+                    show: showBorders,
+                    width: showBorders ? 3 : 0,
+                    colors: [cardBg]
+                };
+            } else {
+                strokeOptions = {
+                    show: showBorders,
+                    width: showBorders ? 2 : 0,
+                    colors: [isDarkMode ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.35)']
+                };
+            }
+
+            const fillOptions = (type === 'area')
+                ? {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: isDarkMode ? 0.35 : 0.28,
+                        opacityTo: 0.02,
+                        stops: [0, 95, 100]
+                    }
+                }
+                : { type: 'solid', opacity: 1 };
+
+            const markersOptions = isLineOrArea
+                ? {
+                    size: 5,
+                    strokeWidth: 2,
+                    strokeColors: cardBg,
+                    hover: { size: 7 },
+                    discrete: colors.map((color, idx) => ({
+                        seriesIndex: 0,
+                        dataPointIndex: idx,
+                        fillColor: color,
+                        strokeColor: cardBg,
+                        size: 5
+                    }))
+                }
+                : { size: 0, discrete: [] };
+
+            return {
+                chart: {
+                    type: type,
+                    width: '100%',
+                    height: getChartHeight(),
+                    background: 'transparent',
+                    foreColor: textColor,
+                    toolbar: { show: false },
+                    fontFamily: 'Inter, sans-serif',
+                    animations: { enabled: true, speed: 350 },
+                    dropShadow: {
+                        enabled: showShadows,
+                        top: 6,
+                        left: 0,
+                        blur: 8,
+                        color: isDarkMode ? '#000000' : '#0f172a',
+                        opacity: isDarkMode ? 0.45 : 0.14
+                    }
+                },
+                theme: { mode: isDarkMode ? 'dark' : 'light' },
+                colors: isLineOrArea ? [primarySeriesColor] : colors,
+                labels: labels,
+                series: isCircular ? values : [{ name: seriesName, data: values }],
+                stroke: strokeOptions,
+                fill: fillOptions,
+                markers: markersOptions,
+                grid: {
+                    borderColor: gridColor,
+                    strokeDashArray: 4,
+                    padding: { top: 10, right: 16, bottom: 10, left: 10 }
+                },
+                xaxis: {
+                    categories: labels,
+                    axisBorder: { color: gridColor },
+                    axisTicks: { color: gridColor },
+                    labels: { style: { colors: textColor, fontSize: '12px' } }
+                },
+                yaxis: {
+                    labels: {
+                        formatter: formatDecimals,
+                        style: { colors: textColor, fontSize: '12px' }
+                    }
+                },
+                tooltip: {
+                    theme: isDarkMode ? 'dark' : 'light',
+                    y: { formatter: formatDecimals }
+                },
+                legend: {
+                    show: showLegend,
+                    position: 'bottom',
+                    fontSize: '13px',
+                    fontFamily: 'Inter, sans-serif',
+                    offsetY: 6,
+                    labels: { colors: strongTextColor }
+                },
+                dataLabels: {
+                    enabled: showLabels,
+                    formatter: isCircular ? (val => Number(val).toFixed(1) + '%') : formatDecimals,
+                    offsetY: isLineOrArea ? -10 : (type === 'bar' ? -22 : 0),
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: 'Inter, sans-serif',
+                        fontWeight: 600,
+                        colors: isCircular ? ['#ffffff'] : [strongTextColor]
+                    },
+                    background: { enabled: false },
+                    dropShadow: {
+                        enabled: isCircular,
+                        top: 1,
+                        left: 1,
+                        blur: 2,
+                        opacity: 0.45
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 6,
+                        columnWidth: '45%',
+                        dataLabels: { position: 'top' },
+                        distributed: true
+                    },
+                    pie: {
+                        donut: { size: '70%' }
+                    }
+                }
+            };
+        }
+
+        function renderChart() {
+            const options = buildChartOptions();
+            currentChartType = options.chart.type;
+            if (chart) {
+                chart.destroy();
+            }
+            chart = new ApexCharts(document.querySelector('#mainChart'), options);
+            chart.render();
+        }
+
+        function updateUI(forceRecreate = false) {
+            const titleInput = document.getElementById('chartTitle').value;
+            const displayTitle = document.getElementById('displayTitle');
+            if (titleInput.trim() !== '') {
+                displayTitle.textContent = titleInput;
+                displayTitle.style.display = 'block';
+            } else {
+                displayTitle.textContent = '';
+                displayTitle.style.display = 'none';
+            }
+
+            if (!chart) return;
+
+            const newType = document.getElementById('chartType').value;
+            // Recréation propre si le type change (évite tout bug d'état ApexCharts)
+            if (forceRecreate || newType !== currentChartType) {
+                renderChart();
+            } else {
+                chart.updateOptions(buildChartOptions(), false, true);
+            }
+        }
+
+        /* Plein écran */
+        function toggleFullscreen() {
+            const el = document.getElementById('captureArea');
+            if (!document.fullscreenElement) {
+                el.requestFullscreen().catch(err => console.warn('Plein écran impossible', err));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function syncFullscreenChartSize() {
+            if (!chart) return;
+            chart.updateOptions({
+                chart: {
+                    width: '100%',
+                    height: getChartHeight()
+                }
+            }, false, false);
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const btn = document.getElementById('fullscreenBtn');
+            const captureArea = document.getElementById('captureArea');
+            const isFs = Boolean(document.fullscreenElement);
+
+            captureArea.classList.toggle('is-fullscreen', isFs);
+            btn.classList.toggle('fullscreen-active', isFs);
+            btn.innerHTML = `<i data-lucide="${isFs ? 'minimize' : 'maximize'}"></i>`;
+            lucide.createIcons();
+
+            // Attendre que le navigateur applique les dimensions plein écran
+            requestAnimationFrame(() => {
+                syncFullscreenChartSize();
+                setTimeout(syncFullscreenChartSize, 150);
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            if (document.fullscreenElement) {
+                syncFullscreenChartSize();
+            }
+        });
+
+        function exportHD() {
+            const btn = document.getElementById('downloadBtn');
+            const element = document.getElementById('captureArea');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader" class="spin"></i> Génération...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                html2canvas(element, {
+                    scale: 4,
+                    backgroundColor: isDarkMode ? '#121216' : '#ffffff',
+                    logging: false
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    const titleInput = document.getElementById('chartTitle').value.trim();
+                    const fileName = titleInput ? `Plot-${titleInput.replace(/\s+/g, '-')}.png` : 'Plot-Graphique-HD.png';
+                    link.download = fileName;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                });
+            }, 100);
+        }
+
+        init();
+    </script>
+</body>
+</html>
