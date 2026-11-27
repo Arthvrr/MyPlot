@@ -405,25 +405,72 @@
             flex-shrink: 0;
         }
 
-        /* Configuration Double Axe Y */
-        .dual-axis-panel {
-            display: none;
+        /* Configuration Axes Y (Titres, Unités, Bornes & Log) */
+        .axis-config-wrapper {
             margin-top: 0.65rem;
             margin-bottom: 0.35rem;
-            padding: 11px 12px;
             border-radius: var(--radius-md);
             border: 1px solid var(--border);
             background: var(--card-subtle);
-            flex-direction: column;
-            gap: 10px;
+            overflow: hidden;
         }
-        .dual-axis-panel.visible {
+        .axis-config-wrapper.hidden {
+            display: none;
+        }
+        .axis-config-toggle {
+            width: 100%;
+            background: transparent;
+            border: none;
+            padding: 9px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: background 0.15s ease;
+        }
+        .axis-config-toggle:hover {
+            background: var(--card-hover);
+        }
+        .axis-config-toggle-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+        }
+        .axis-config-toggle-left svg,
+        .axis-config-chevron {
+            width: 14px;
+            height: 14px;
+            color: var(--text-muted);
+            transition: transform 0.2s ease;
+        }
+        .axis-config-wrapper.open .axis-config-chevron {
+            transform: rotate(180deg);
+        }
+        .dual-axis-panel {
+            display: none;
+            padding: 2px 12px 12px 12px;
+            flex-direction: column;
+            gap: 11px;
+            border-top: 1px solid var(--border);
+        }
+        .axis-config-wrapper.open .dual-axis-panel {
             display: flex;
         }
         .dual-axis-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 6px;
+            padding-top: 8px;
+        }
+        .dual-axis-group.hidden {
+            display: none;
         }
         .dual-axis-label {
             font-size: 0.71rem;
@@ -433,16 +480,102 @@
             color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: space-between;
+            gap: 6px;
         }
         .dual-axis-fields {
             display: grid;
             grid-template-columns: 1fr 86px;
             gap: 7px;
         }
-        .dual-axis-fields input[type="text"] {
-            padding: 0.5rem 0.7rem;
-            font-size: 0.81rem;
+        .dual-axis-bounds {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 7px;
+            align-items: center;
+        }
+        .dual-axis-fields input[type="text"],
+        .dual-axis-bounds input[type="number"] {
+            padding: 0.48rem 0.65rem;
+            font-size: 0.8rem;
+        }
+        .log-pill-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.46rem 0.6rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            margin: 0;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .log-pill-toggle:hover {
+            border-color: var(--border-strong);
+            color: var(--text-main);
+        }
+        .log-pill-toggle input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            margin: 0;
+        }
+        .log-pill-toggle:has(input:checked) {
+            border-color: var(--primary);
+            color: var(--text-main);
+            background: var(--card-hover);
+        }
+
+        /* Repères & Annotations */
+        .annotations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .annotation-card {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 9px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: var(--card-subtle);
+        }
+        .annotation-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+        }
+        .annotation-top-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .annotation-top input[type="color"] {
+            width: 28px;
+            height: 28px;
+        }
+        .annotation-top .btn-remove {
+            width: 28px;
+            height: 28px;
+        }
+        .annotation-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .annotation-fields input[type="text"],
+        .annotation-fields input[type="number"] {
+            padding: 0.48rem 0.65rem;
+            font-size: 0.8rem;
         }
 
         /* Séries */
@@ -457,6 +590,8 @@
             display: flex;
             flex-direction: column;
             gap: 7px;
+            border-radius: var(--radius-md);
+            transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
         }
         .series-card.has-controls {
             padding: 9px;
@@ -464,15 +599,25 @@
             border: 1px solid var(--border);
             background: var(--card-subtle);
         }
+        .series-card.is-dragging {
+            opacity: 0.35;
+        }
+        .series-card.drag-over-top {
+            box-shadow: 0 -2px 0 0 var(--primary);
+        }
+        .series-card.drag-over-bottom {
+            box-shadow: 0 2px 0 0 var(--primary);
+        }
 
         .series-row {
             display: grid;
-            grid-template-columns: 34px 1fr 34px;
-            gap: 8px;
+            grid-template-columns: 20px 34px 1fr 22px 34px;
+            gap: 6px;
             align-items: center;
         }
         .series-row.single-series {
             grid-template-columns: 34px 1fr;
+            gap: 8px;
         }
 
         .series-subcontrols {
@@ -528,8 +673,8 @@
         /* Lignes de données & Réordonnancement */
         .data-row {
             display: grid;
-            grid-template-columns: 20px 30px 1fr 76px 22px 20px 30px;
-            gap: 6px;
+            grid-template-columns: 18px 28px 1fr 68px 34px 22px 18px 28px;
+            gap: 5px;
             margin-bottom: 8px;
             align-items: center;
             position: relative;
@@ -537,7 +682,61 @@
             transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
         }
         .data-row.no-row-color {
-            grid-template-columns: 20px 1fr 78px 22px 20px 30px;
+            grid-template-columns: 18px 1fr 72px 34px 22px 18px 28px;
+        }
+        .btn-est {
+            height: 34px;
+            padding: 0 5px;
+            border-radius: 7px;
+            border: 1px dashed var(--border-strong);
+            background: var(--input-bg);
+            color: var(--text-muted);
+            font-size: 0.67rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .btn-est:hover {
+            color: var(--text-main);
+            background: var(--card-hover);
+            border-color: var(--primary);
+        }
+        .btn-est.active {
+            background: var(--primary);
+            color: var(--primary-fg);
+            border: 1px solid var(--primary);
+        }
+        .btn-est-mini {
+            margin-left: auto;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 5px;
+            border: 1px dashed var(--border-strong);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.62rem;
+            font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+        .btn-est-mini:hover {
+            color: var(--text-main);
+            border-color: var(--primary);
+        }
+        .btn-est-mini.active {
+            background: var(--primary);
+            color: var(--primary-fg);
+            border: 1px solid var(--primary);
+        }
+        .series-val-field.is-estimated input[type="number"],
+        .data-row.is-estimated-single input[type="number"] {
+            border-style: dashed;
+            opacity: 0.85;
         }
         .data-row.multi-series-row {
             display: flex;
@@ -791,6 +990,7 @@
         }
 
         .export-container .export-title,
+        .export-container .export-subtitle,
         .export-container .avg-badge,
         .export-container .chart-source,
         .export-container .made-with-plot,
@@ -818,6 +1018,58 @@
             margin-bottom: 1.25rem;
             display: none;
             flex-shrink: 0;
+        }
+        .export-title.has-subtitle {
+            margin-bottom: 0.35rem;
+        }
+        .export-subtitle {
+            text-align: center;
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 0;
+            margin-bottom: 1.15rem;
+            line-height: 1.4;
+            display: none;
+            flex-shrink: 0;
+        }
+
+        /* Légende forcée sur une seule ligne */
+        #mainChart .apexcharts-legend {
+            flex-wrap: nowrap !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 0 14px !important;
+            overflow-x: auto !important;
+            scrollbar-width: none;
+            max-width: 100% !important;
+            padding: 4px 8px !important;
+        }
+        #mainChart .apexcharts-legend::-webkit-scrollbar {
+            display: none;
+        }
+        #mainChart .apexcharts-legend-series {
+            display: inline-flex !important;
+            align-items: center !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+            margin: 0 !important;
+        }
+        #mainChart .apexcharts-legend-text {
+            white-space: nowrap !important;
+        }
+
+        /* Style renforcé des données estimées */
+        #mainChart .myplot-estimated-bar {
+            fill-opacity: 0.36 !important;
+            stroke-dasharray: 5 3 !important;
+            stroke-width: 2 !important;
+            stroke-opacity: 0.95 !important;
+        }
+        #mainChart .myplot-estimated-slice {
+            fill-opacity: 0.38 !important;
+            stroke-dasharray: 5 3 !important;
+            stroke-width: 2 !important;
         }
 
         /* Badge moyenne pour les graphiques circulaires / radar */
@@ -1152,6 +1404,185 @@
             justify-content: flex-end;
             gap: 8px;
         }
+        .modal-footer.space-between {
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        /* Bibliothèque locale de graphiques */
+        .library-count-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            background: var(--primary);
+            color: var(--primary-fg);
+        }
+        .library-save-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+        .library-save-bar input[type="text"] {
+            flex: 1;
+            min-width: 0;
+        }
+        .library-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 310px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding-right: 2px;
+        }
+        .library-list::-webkit-scrollbar { width: 5px; }
+        .library-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+        .library-empty {
+            text-align: center;
+            padding: 1.75rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            border: 1px dashed var(--border-strong);
+            border-radius: 14px;
+            background: var(--card-subtle);
+        }
+        .library-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 13px;
+            border: 1px solid var(--border);
+            background: var(--card-subtle);
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .library-item:hover {
+            border-color: var(--border-strong);
+            background: var(--card-hover);
+        }
+        .library-item.is-active {
+            border-color: var(--primary);
+        }
+        .library-item-info {
+            min-width: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .library-item-title-row {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 0;
+        }
+        .library-item-name {
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .library-active-pill {
+            font-size: 0.64rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 999px;
+            background: var(--primary);
+            color: var(--primary-fg);
+            flex-shrink: 0;
+        }
+        .library-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+        .library-item-swatches {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .library-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        .btn-lib-action {
+            height: 30px;
+            padding: 0 9px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-main);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+        .btn-lib-action:hover {
+            background: var(--primary);
+            color: var(--primary-fg);
+            border-color: var(--primary);
+        }
+        .btn-lib-action svg { width: 13px; height: 13px; }
+        .btn-lib-danger {
+            height: 30px;
+            width: 30px;
+            padding: 0;
+            border-radius: 8px;
+            border: none;
+            background: var(--danger-bg);
+            color: var(--danger-fg);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s ease;
+        }
+        .btn-lib-danger:hover {
+            background: var(--danger-hover);
+        }
+        .btn-lib-danger svg { width: 14px; height: 14px; }
+        .btn-danger-outline {
+            background: var(--danger-bg);
+            color: var(--danger-fg);
+            border: 1px solid transparent;
+            padding: 0 0.9rem;
+            height: 36px;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+        .btn-danger-outline:hover {
+            background: var(--danger-hover);
+        }
+        .btn-danger-outline.confirming {
+            background: #ef4444;
+            color: #ffffff;
+        }
+        .btn-danger-outline svg { width: 14px; height: 14px; }
 
         /* Toast notification */
         .toast {
@@ -1229,8 +1660,24 @@
         </div>
 
         <div class="input-group">
-            <label for="chartSource">Source (bas à gauche)</label>
-            <input type="text" id="chartSource" placeholder="Ex: Source : Eurostat, 2026" oninput="onMetaInput()">
+            <label for="chartSubtitle">Sous-titre (discret)</label>
+            <input type="text" id="chartSubtitle" placeholder="Ex: En milliards de dollars — Données trimestrielles" oninput="onMetaInput()">
+        </div>
+
+        <div class="input-row-2">
+            <div class="input-group">
+                <label for="chartSource">Source (bas à gauche)</label>
+                <input type="text" id="chartSource" placeholder="Ex: Eurostat, 2026" oninput="onMetaInput()">
+            </div>
+            <div class="input-group">
+                <label for="numberFormat">Format des nombres</label>
+                <select id="numberFormat" onchange="onNumberFormatChange()">
+                    <option value="auto">Auto (sans .00)</option>
+                    <option value="0">Entier (0 déc.)</option>
+                    <option value="1">1 décimale (0.0)</option>
+                    <option value="2">2 décimales (0.00)</option>
+                </select>
+            </div>
         </div>
 
         <div class="input-row-2">
@@ -1285,29 +1732,54 @@
             <label class="toggle-container"><input type="checkbox" id="dualYAxis" onchange="onToggleChange('dualYAxis')"> <span>Double axe Y</span></label>
         </div>
 
-        <div class="dual-axis-panel" id="dualAxisPanel">
-            <div class="dual-axis-group">
-                <div class="dual-axis-label">Axe Y gauche (Principal)</div>
-                <div class="dual-axis-fields">
-                    <input type="text" id="leftAxisTitle" placeholder="Titre (ex: Revenus)" oninput="onAxisConfigInput()">
-                    <input type="text" id="leftAxisUnit" list="unitSuggestions" placeholder="Unité" oninput="onAxisConfigInput()">
+        <div class="axis-config-wrapper" id="axisConfigWrapper">
+            <button type="button" class="axis-config-toggle" onclick="toggleAxisConfigPanel()">
+                <span class="axis-config-toggle-left">
+                    <i data-lucide="sliders-horizontal"></i>
+                    <span>Axes Y (Bornes, Unités & Log)</span>
+                </span>
+                <i data-lucide="chevron-down" class="axis-config-chevron"></i>
+            </button>
+            <div class="dual-axis-panel" id="dualAxisPanel">
+                <div class="dual-axis-group" id="leftAxisGroup">
+                    <div class="dual-axis-label">Axe Y gauche (Principal)</div>
+                    <div class="dual-axis-fields">
+                        <input type="text" id="leftAxisTitle" placeholder="Titre (ex: Revenus)" oninput="onAxisConfigInput()">
+                        <input type="text" id="leftAxisUnit" list="unitSuggestions" placeholder="Unité" oninput="onAxisConfigInput()">
+                    </div>
+                    <div class="dual-axis-bounds">
+                        <input type="number" id="leftAxisMin" step="any" placeholder="Min (Auto)" oninput="onAxisConfigInput()">
+                        <input type="number" id="leftAxisMax" step="any" placeholder="Max (Auto)" oninput="onAxisConfigInput()">
+                        <label class="log-pill-toggle" title="Activer l'échelle logarithmique sur l'axe principal">
+                            <input type="checkbox" id="leftAxisLog" onchange="onAxisConfigInput('leftLog')"> Log
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="dual-axis-group">
-                <div class="dual-axis-label">Axe Y droit (Secondaire)</div>
-                <div class="dual-axis-fields">
-                    <input type="text" id="rightAxisTitle" placeholder="Titre (ex: Marge)" oninput="onAxisConfigInput()">
-                    <input type="text" id="rightAxisUnit" list="unitSuggestions" placeholder="Ex: %" oninput="onAxisConfigInput()">
+                <div class="dual-axis-group hidden" id="rightAxisGroup">
+                    <div class="dual-axis-label">Axe Y droit (Secondaire)</div>
+                    <div class="dual-axis-fields">
+                        <input type="text" id="rightAxisTitle" placeholder="Titre (ex: Marge)" oninput="onAxisConfigInput()">
+                        <input type="text" id="rightAxisUnit" list="unitSuggestions" placeholder="Ex: %" oninput="onAxisConfigInput()">
+                    </div>
+                    <div class="dual-axis-bounds">
+                        <input type="number" id="rightAxisMin" step="any" placeholder="Min (Auto)" oninput="onAxisConfigInput()">
+                        <input type="number" id="rightAxisMax" step="any" placeholder="Max (Auto)" oninput="onAxisConfigInput()">
+                        <label class="log-pill-toggle" title="Activer l'échelle logarithmique sur l'axe secondaire">
+                            <input type="checkbox" id="rightAxisLog" onchange="onAxisConfigInput('rightLog')"> Log
+                        </label>
+                    </div>
                 </div>
+                <datalist id="unitSuggestions">
+                    <option value="%"></option>
+                    <option value="€"></option>
+                    <option value="$"></option>
+                    <option value="k"></option>
+                    <option value="M"></option>
+                    <option value="Mds $"></option>
+                    <option value="Mds €"></option>
+                    <option value="pts"></option>
+                </datalist>
             </div>
-            <datalist id="unitSuggestions">
-                <option value="%"></option>
-                <option value="€"></option>
-                <option value="$"></option>
-                <option value="k"></option>
-                <option value="M"></option>
-                <option value="pts"></option>
-            </datalist>
         </div>
 
         <div class="section-header">
@@ -1343,10 +1815,24 @@
                 <i data-lucide="file-spreadsheet"></i> Importer CSV/XLSX
             </button>
         </div>
+
+        <div class="section-header">
+            <div class="section-title">Repères & Annotations</div>
+        </div>
+        <div id="annotationsHint" class="circular-hint">Les repères d'évènements s'affichent sur les graphiques cartésiens (Barres, Combiné, Courbe, Escalier, Zone, Nuage).</div>
+        <datalist id="categorySuggestions"></datalist>
+        <div id="annotationsList" class="annotations-list"></div>
+        <button type="button" class="btn-add" id="addAnnotationBtn" onclick="addAnnotation()">
+            <i data-lucide="flag"></i> Ajouter un repère
+        </button>
     </aside>
 
     <main class="main-content" id="mainContent">
         <div class="actions">
+            <button class="btn-secondary" id="libraryBtn" onclick="openLibraryModal()" title="Ouvrir la bibliothèque locale de graphiques">
+                <i data-lucide="folder-open"></i> Bibliothèque
+                <span class="library-count-badge" id="libraryCountBadge" style="display:none;">0</span>
+            </button>
             <button class="btn-icon" id="fullscreenBtn" onclick="toggleFullscreen()" title="Plein écran">
                 <i data-lucide="maximize"></i>
             </button>
@@ -1425,6 +1911,7 @@
                     <i data-lucide="minimize"></i>
                 </button>
                 <h2 id="displayTitle" class="export-title"></h2>
+                <p id="displaySubtitle" class="export-subtitle"></p>
                 <div id="avgBadge" class="avg-badge"></div>
                 <div id="mainChart"></div>
                 <div id="displaySource" class="chart-source"></div>
@@ -1476,11 +1963,60 @@
         </div>
     </div>
 
+    <!-- Modal Bibliothèque Locale de Graphiques -->
+    <div class="modal-backdrop" id="libraryModal" onclick="if (event.target === this) closeLibraryModal()">
+        <div class="modal-card" style="max-width: 580px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i data-lucide="folder-open"></i> Bibliothèque locale</h3>
+                <button type="button" class="btn-icon" style="width: 34px; height: 34px;" onclick="closeLibraryModal()" title="Fermer">
+                    <i data-lucide="x" style="width: 16px; height: 16px;"></i>
+                </button>
+            </div>
+            <p class="modal-desc">
+                Sauvegardez plusieurs graphiques dans votre navigateur (localStorage) pour les retrouver, les dupliquer ou les supprimer à tout moment.
+            </p>
+            <div class="library-save-bar">
+                <input type="text" id="librarySaveName" placeholder="Nom du graphique à enregistrer..." onkeydown="if (event.key === 'Enter') saveChartToLibrary(false)">
+                <button type="button" class="btn-secondary" id="libraryUpdateBtn" style="display:none; height: 38px; white-space: nowrap;" onclick="saveChartToLibrary(true)" title="Écraser la version actuellement chargée">
+                    <i data-lucide="save"></i> Mettre à jour
+                </button>
+                <button type="button" class="btn-download" style="height: 38px; white-space: nowrap;" onclick="saveChartToLibrary(false)">
+                    <i data-lucide="plus"></i> Enregistrer
+                </button>
+            </div>
+            <div id="libraryList" class="library-list"></div>
+            <div class="modal-footer space-between">
+                <button type="button" class="btn-danger-outline" id="clearLibraryBtn" onclick="clearLocalLibrary()">
+                    <i data-lucide="trash-2"></i> Tout vider
+                </button>
+                <button type="button" class="btn-secondary" style="height: 36px;" onclick="closeLibraryModal()">
+                    Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
     <script>
         const STORAGE_KEY = 'myplot-state-v1';
         const LEGACY_STORAGE_KEY = 'plot-state-v2';
+        const LIBRARY_STORAGE_KEY = 'myplot-library-v1';
+        const VALID_NUMBER_FORMATS = ['auto', '0', '1', '2'];
+        const CHART_TYPE_LABELS = {
+            'bar': 'Barres',
+            'bar-horizontal': 'Barres horiz.',
+            'combo': 'Combiné',
+            'line': 'Courbe',
+            'step': 'Escalier',
+            'area': 'Zone',
+            'scatter': 'Nuage',
+            'radar': 'Radar',
+            'donut': 'Anneau',
+            'pie': 'Camembert',
+            'polarArea': 'Aire polaire',
+            'radialBar': 'Jauges'
+        };
 
         const VALID_CHART_TYPES = [
             'bar', 'bar-horizontal', 'combo', 'line', 'step', 'area',
@@ -1595,6 +2131,16 @@
         let unsortedOrderIds = [];
         let rowIdSeq = 1;
         let draggedRowIndex = null;
+        let draggedSeriesIndex = null;
+        let annotationIdSeq = 1;
+        let currentLibraryId = null;
+        let clearLibraryConfirmTimer = null;
+        let axisConfigOpen = false;
+        let latestEstimatedMeta = null;
+
+        function nextAnnotationId() {
+            return 'ann_' + (annotationIdSeq++);
+        }
 
         function nextRowId() {
             return 'r_' + (rowIdSeq++);
@@ -1621,22 +2167,66 @@
             return dark ? p.dark : p.light;
         }
 
-        function formatDecimalsValue(val) {
+        function formatNumberValue(val, mode = (state && state.numberFormat) || 'auto') {
             const num = Number(val);
-            return Number.isFinite(num) ? num.toFixed(2) : '0.00';
+            if (!Number.isFinite(num)) return '0';
+            if (mode === '0') return String(Math.round(num));
+            if (mode === '1') return num.toFixed(1);
+            if (mode === '2') return num.toFixed(2);
+            // Mode 'auto' : retire les .00 et zéros finaux inutiles
+            if (Math.abs(num) > 0 && Math.abs(num) < 0.01) {
+                return Number(num.toPrecision(2)).toString();
+            }
+            const rounded = Math.round((num + Number.EPSILON) * 100) / 100;
+            if (Object.is(rounded, -0) || rounded === 0) return '0';
+            if (Number.isInteger(rounded)) return String(rounded);
+            return rounded.toFixed(2).replace(/\.?0+$/, '');
+        }
+
+        function formatDecimalsValue(val) {
+            return formatNumberValue(val);
         }
 
         function formatWithUnit(val, unit = '') {
-            const formatted = formatDecimalsValue(val);
+            const formatted = formatNumberValue(val);
             const u = String(unit || '').trim();
             return u ? `${formatted} ${u}` : formatted;
+        }
+
+        function parseOptionalBound(raw) {
+            if (raw === null || raw === undefined) return null;
+            const s = String(raw).trim();
+            if (s === '') return null;
+            const num = Number(s);
+            return Number.isFinite(num) ? num : null;
+        }
+
+        function hexToRgba(hex, alpha = 0.4) {
+            const clean = String(hex || '#3b82f6').replace('#', '').trim();
+            if (clean.length === 3) {
+                const r = parseInt(clean[0] + clean[0], 16);
+                const g = parseInt(clean[1] + clean[1], 16);
+                const b = parseInt(clean[2] + clean[2], 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+            if (clean.length === 6) {
+                const r = parseInt(clean.slice(0, 2), 16);
+                const g = parseInt(clean.slice(2, 4), 16);
+                const b = parseInt(clean.slice(4, 6), 16);
+                if (Number.isFinite(r) && Number.isFinite(g) && Number.isFinite(b)) {
+                    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+                }
+            }
+            return `rgba(59, 130, 246, ${alpha})`;
         }
 
         function createDefaultState(dark = false) {
             const cols = getPaletteColors('nordic', dark);
             return {
                 title: '',
+                subtitle: '',
                 source: '',
+                numberFormat: 'auto',
                 chartType: 'bar',
                 fontFamily: 'Inter',
                 aspectRatio: 'auto',
@@ -1650,18 +2240,25 @@
                 dualYAxis: false,
                 leftAxisTitle: '',
                 leftAxisUnit: '',
+                leftAxisMin: '',
+                leftAxisMax: '',
+                leftAxisLog: false,
                 rightAxisTitle: '',
                 rightAxisUnit: '',
+                rightAxisMin: '',
+                rightAxisMax: '',
+                rightAxisLog: false,
                 activePalette: 'nordic',
                 series: [
                     { name: 'Valeur', color: cols[0], type: 'column', yAxis: 0 }
                 ],
                 rows: [
-                    { id: nextRowId(), label: 'Q1', values: [120.5], color: cols[0], hidden: false },
-                    { id: nextRowId(), label: 'Q2', values: [180.0], color: cols[1], hidden: false },
-                    { id: nextRowId(), label: 'Q3', values: [250.75], color: cols[2], hidden: false },
-                    { id: nextRowId(), label: 'Q4', values: [310.2], color: cols[3], hidden: false }
-                ]
+                    { id: nextRowId(), label: 'Q1', values: [120.5], estimated: [false], color: cols[0], hidden: false },
+                    { id: nextRowId(), label: 'Q2', values: [180.0], estimated: [false], color: cols[1], hidden: false },
+                    { id: nextRowId(), label: 'Q3', values: [250.75], estimated: [false], color: cols[2], hidden: false },
+                    { id: nextRowId(), label: 'Q4', values: [310.2], estimated: [false], color: cols[3], hidden: false }
+                ],
+                annotations: []
             };
         }
 
@@ -1681,10 +2278,12 @@
         function encodeStateToHash(st, overrideDark = null) {
             const dkVal = overrideDark === null ? (isDarkMode ? 1 : 0) : (overrideDark ? 1 : 0);
             const compact = {
-                v: 5,
+                v: 6,
                 dk: dkVal,
                 t: st.title,
+                sb: st.subtitle || '',
                 so: st.source,
+                nf: st.numberFormat || 'auto',
                 ct: st.chartType,
                 fn: st.fontFamily || 'Inter',
                 ar: st.aspectRatio || 'auto',
@@ -1698,8 +2297,14 @@
                 dy: st.dualYAxis ? 1 : 0,
                 lat: st.leftAxisTitle || '',
                 lau: st.leftAxisUnit || '',
+                lmin: st.leftAxisMin !== '' && st.leftAxisMin !== undefined ? String(st.leftAxisMin) : '',
+                lmax: st.leftAxisMax !== '' && st.leftAxisMax !== undefined ? String(st.leftAxisMax) : '',
+                llog: st.leftAxisLog ? 1 : 0,
                 rat: st.rightAxisTitle || '',
                 rau: st.rightAxisUnit || '',
+                rmin: st.rightAxisMin !== '' && st.rightAxisMin !== undefined ? String(st.rightAxisMin) : '',
+                rmax: st.rightAxisMax !== '' && st.rightAxisMax !== undefined ? String(st.rightAxisMax) : '',
+                rlog: st.rightAxisLog ? 1 : 0,
                 p: st.activePalette || '',
                 s: st.series.map((s, idx) => [
                     s.name,
@@ -1707,7 +2312,16 @@
                     s.type || (idx === 0 ? 'column' : 'line'),
                     Number(s.yAxis) === 1 ? 1 : 0
                 ]),
-                r: st.rows.map(r => [r.label, r.values, r.color, r.hidden ? 1 : 0])
+                r: st.rows.map(r => [
+                    r.label,
+                    r.values,
+                    r.color,
+                    r.hidden ? 1 : 0,
+                    Array.isArray(r.estimated) ? r.estimated.map(e => (e ? 1 : 0)) : []
+                ]),
+                an: Array.isArray(st.annotations)
+                    ? st.annotations.map(a => [a.axis === 'y' ? 'y' : 'x', String(a.value ?? ''), String(a.label || ''), String(a.color || '#f59e0b'), Number(a.yAxis) === 1 ? 1 : 0])
+                    : []
             };
             const bytes = new TextEncoder().encode(JSON.stringify(compact));
             let binary = '';
@@ -1726,11 +2340,14 @@
             }
             const validRatio = ASPECT_RATIOS.some(a => a.id === data.ar) ? data.ar : 'auto';
             const validFont = FONT_OPTIONS[data.fn] ? data.fn : 'Inter';
+            const validFmt = VALID_NUMBER_FORMATS.includes(data.nf) ? data.nf : 'auto';
             return {
                 dark: typeof data.dk === 'number' ? data.dk === 1 : null,
                 state: {
                     title: String(data.t || ''),
+                    subtitle: String(data.sb || ''),
                     source: String(data.so || ''),
+                    numberFormat: validFmt,
                     chartType: VALID_CHART_TYPES.includes(data.ct) ? data.ct : 'bar',
                     fontFamily: validFont,
                     aspectRatio: validRatio,
@@ -1744,8 +2361,14 @@
                     dualYAxis: Boolean(data.dy),
                     leftAxisTitle: String(data.lat || ''),
                     leftAxisUnit: String(data.lau || ''),
+                    leftAxisMin: data.lmin !== undefined ? String(data.lmin) : '',
+                    leftAxisMax: data.lmax !== undefined ? String(data.lmax) : '',
+                    leftAxisLog: Boolean(data.llog),
                     rightAxisTitle: String(data.rat || ''),
                     rightAxisUnit: String(data.rau || ''),
+                    rightAxisMin: data.rmin !== undefined ? String(data.rmin) : '',
+                    rightAxisMax: data.rmax !== undefined ? String(data.rmax) : '',
+                    rightAxisLog: Boolean(data.rlog),
                     activePalette: data.p || '',
                     series: data.s.map((item, idx) => ({
                         name: String(item[0] || 'Série'),
@@ -1758,8 +2381,19 @@
                         label: String(item[0] || ''),
                         values: Array.isArray(item[1]) ? item[1].map(n => Number(n) || 0) : [0],
                         color: String(item[2] || '#3b82f6'),
-                        hidden: Boolean(item[3])
-                    }))
+                        hidden: Boolean(item[3]),
+                        estimated: Array.isArray(item[4]) ? item[4].map(e => Boolean(e)) : []
+                    })),
+                    annotations: Array.isArray(data.an)
+                        ? data.an.map(a => ({
+                            id: nextAnnotationId(),
+                            axis: a[0] === 'y' ? 'y' : 'x',
+                            value: String(a[1] ?? ''),
+                            label: String(a[2] || ''),
+                            color: String(a[3] || '#f59e0b'),
+                            yAxis: Number(a[4]) === 1 ? 1 : 0
+                        }))
+                        : []
                 }
             };
         }
@@ -1791,12 +2425,20 @@
             if (!FONT_OPTIONS[state.fontFamily]) state.fontFamily = 'Inter';
             if (!VALID_CHART_TYPES.includes(state.chartType)) state.chartType = 'bar';
             if (!ASPECT_RATIOS.some(a => a.id === state.aspectRatio)) state.aspectRatio = 'auto';
+            if (!VALID_NUMBER_FORMATS.includes(state.numberFormat)) state.numberFormat = 'auto';
 
+            state.subtitle = String(state.subtitle || '');
             state.dualYAxis = Boolean(state.dualYAxis);
             state.leftAxisTitle = String(state.leftAxisTitle || '');
             state.leftAxisUnit = String(state.leftAxisUnit || '');
+            state.leftAxisMin = state.leftAxisMin !== undefined && state.leftAxisMin !== null ? String(state.leftAxisMin) : '';
+            state.leftAxisMax = state.leftAxisMax !== undefined && state.leftAxisMax !== null ? String(state.leftAxisMax) : '';
+            state.leftAxisLog = Boolean(state.leftAxisLog);
             state.rightAxisTitle = String(state.rightAxisTitle || '');
             state.rightAxisUnit = String(state.rightAxisUnit || '');
+            state.rightAxisMin = state.rightAxisMin !== undefined && state.rightAxisMin !== null ? String(state.rightAxisMin) : '';
+            state.rightAxisMax = state.rightAxisMax !== undefined && state.rightAxisMax !== null ? String(state.rightAxisMax) : '';
+            state.rightAxisLog = Boolean(state.rightAxisLog);
 
             state.series.forEach((s, idx) => {
                 if (!VALID_COMBO_SERIES_TYPES.includes(s.type)) {
@@ -1810,7 +2452,23 @@
                 if (!Array.isArray(row.values)) row.values = [0];
                 while (row.values.length < count) row.values.push(0);
                 if (row.values.length > count) row.values = row.values.slice(0, count);
+
+                if (!Array.isArray(row.estimated)) row.estimated = [];
+                while (row.estimated.length < count) row.estimated.push(false);
+                if (row.estimated.length > count) row.estimated = row.estimated.slice(0, count);
+                row.estimated = row.estimated.map(Boolean);
             });
+
+            if (!Array.isArray(state.annotations)) state.annotations = [];
+            state.annotations = state.annotations.map(a => ({
+                id: a.id || nextAnnotationId(),
+                axis: a.axis === 'y' ? 'y' : 'x',
+                value: String(a.value ?? ''),
+                label: String(a.label || ''),
+                color: String(a.color || '#f59e0b'),
+                yAxis: Number(a.yAxis) === 1 ? 1 : 0
+            }));
+
             unsortedOrderIds = state.rows.map(r => r.id);
         }
 
@@ -1858,6 +2516,7 @@
         function resetToDefault() {
             state = createDefaultState(isDarkMode);
             ensureRowIdsAndSanitize();
+            currentLibraryId = null;
             lastSortDir = null;
             updateSortButtonsUI();
             if (window.location.hash) {
@@ -1868,6 +2527,7 @@
             renderPalettes();
             renderSeriesList();
             renderDataList();
+            renderAnnotationsList();
             applyAspectRatioLayout();
             updateUI(true);
             showToast('Graphique réinitialisé');
@@ -1918,16 +2578,40 @@
             scheduleCleanRerender(320);
         }
 
-        function updateDualAxisPanelVisibility() {
-            const panel = document.getElementById('dualAxisPanel');
-            if (!panel) return;
-            const visible = state.dualYAxis && supportsDualAxis(state.chartType);
-            panel.classList.toggle('visible', visible);
+        function toggleAxisConfigPanel() {
+            axisConfigOpen = !axisConfigOpen;
+            const wrapper = document.getElementById('axisConfigWrapper');
+            if (wrapper) wrapper.classList.toggle('open', axisConfigOpen);
+        }
+
+        function updateDualAxisPanelVisibility(autoExpand = false) {
+            const wrapper = document.getElementById('axisConfigWrapper');
+            const rightGroup = document.getElementById('rightAxisGroup');
+            if (!wrapper) return;
+
+            const isCartesian = !isCircularType(state.chartType) && state.chartType !== 'radar';
+            wrapper.classList.toggle('hidden', !isCartesian);
+
+            const showRight = state.dualYAxis && supportsDualAxis(state.chartType) && state.series.length >= 2;
+            if (rightGroup) rightGroup.classList.toggle('hidden', !showRight);
+
+            if (autoExpand || showRight) {
+                axisConfigOpen = true;
+            }
+            wrapper.classList.toggle('open', axisConfigOpen);
+        }
+
+        function syncPrimaryDualAxes() {
+            if (!state.dualYAxis || state.series.length < 2) return;
+            state.series[0].yAxis = 0;
+            state.series[1].yAxis = 1;
         }
 
         function syncControlsFromState() {
             document.getElementById('chartTitle').value = state.title;
+            document.getElementById('chartSubtitle').value = state.subtitle || '';
             document.getElementById('chartSource').value = state.source;
+            document.getElementById('numberFormat').value = state.numberFormat || 'auto';
             document.getElementById('chartType').value = state.chartType;
             document.getElementById('chartFont').value = state.fontFamily || 'Inter';
             document.getElementById('showLegend').checked = state.showLegend;
@@ -1940,13 +2624,22 @@
             document.getElementById('dualYAxis').checked = state.dualYAxis;
             document.getElementById('leftAxisTitle').value = state.leftAxisTitle || '';
             document.getElementById('leftAxisUnit').value = state.leftAxisUnit || '';
+            document.getElementById('leftAxisMin').value = state.leftAxisMin || '';
+            document.getElementById('leftAxisMax').value = state.leftAxisMax || '';
+            document.getElementById('leftAxisLog').checked = Boolean(state.leftAxisLog);
             document.getElementById('rightAxisTitle').value = state.rightAxisTitle || '';
             document.getElementById('rightAxisUnit').value = state.rightAxisUnit || '';
-            updateDualAxisPanelVisibility();
+            document.getElementById('rightAxisMin').value = state.rightAxisMin || '';
+            document.getElementById('rightAxisMax').value = state.rightAxisMax || '';
+            document.getElementById('rightAxisLog').checked = Boolean(state.rightAxisLog);
+            updateDualAxisPanelVisibility(
+                Boolean(state.dualYAxis || state.leftAxisMin !== '' || state.leftAxisMax !== '' || state.leftAxisLog || state.rightAxisMin !== '' || state.rightAxisMax !== '' || state.rightAxisLog)
+            );
         }
 
         function onMetaInput() {
             state.title = document.getElementById('chartTitle').value;
+            state.subtitle = document.getElementById('chartSubtitle').value;
             state.source = document.getElementById('chartSource').value;
             updateHeaderAndFooterDOM();
             if (state.aspectRatio !== 'auto' || getFullscreenElement() || isEmbedMode) {
@@ -1957,11 +2650,47 @@
             }
         }
 
-        function onAxisConfigInput() {
+        function onNumberFormatChange() {
+            state.numberFormat = document.getElementById('numberFormat').value;
+            updateUI(true);
+        }
+
+        function checkLogScalePositiveValues(axisSide) {
+            const visibleRows = state.rows.filter(r => !r.hidden && r.label.trim() !== '');
+            const dual = state.dualYAxis && supportsDualAxis(state.chartType) && state.series.length >= 2;
+            const targetIndices = dual
+                ? state.series
+                    .map((s, idx) => ((Number(s.yAxis) === 1 ? 'right' : 'left') === axisSide ? idx : -1))
+                    .filter(idx => idx !== -1)
+                : state.series.map((_, idx) => idx);
+
+            for (const row of visibleRows) {
+                for (const idx of targetIndices) {
+                    if ((Number(row.values[idx]) || 0) <= 0) return false;
+                }
+            }
+            return true;
+        }
+
+        function onAxisConfigInput(source) {
             state.leftAxisTitle = document.getElementById('leftAxisTitle').value;
             state.leftAxisUnit = document.getElementById('leftAxisUnit').value;
+            state.leftAxisMin = document.getElementById('leftAxisMin').value;
+            state.leftAxisMax = document.getElementById('leftAxisMax').value;
+            state.leftAxisLog = document.getElementById('leftAxisLog').checked;
             state.rightAxisTitle = document.getElementById('rightAxisTitle').value;
             state.rightAxisUnit = document.getElementById('rightAxisUnit').value;
+            state.rightAxisMin = document.getElementById('rightAxisMin').value;
+            state.rightAxisMax = document.getElementById('rightAxisMax').value;
+            state.rightAxisLog = document.getElementById('rightAxisLog').checked;
+
+            if (source === 'leftLog' && state.leftAxisLog && !checkLogScalePositiveValues('left')) {
+                showToast('Échelle log : attention, certaines valeurs de l’axe gauche sont ≤ 0');
+            }
+            if (source === 'rightLog' && state.rightAxisLog && !checkLogScalePositiveValues('right')) {
+                showToast('Échelle log : attention, certaines valeurs de l’axe droit sont ≤ 0');
+            }
+
             updateUI(true);
         }
 
@@ -1991,8 +2720,8 @@
                 }
                 if (state.series.length < 2) {
                     showToast('Ajoutez une 2e série pour afficher le second axe à droite');
-                } else if (!state.series.some(s => Number(s.yAxis) === 1)) {
-                    state.series[state.series.length - 1].yAxis = 1;
+                } else {
+                    syncPrimaryDualAxes();
                 }
             }
 
@@ -2016,9 +2745,10 @@
                 showToast('La courbe de tendance s’affiche sur Barres, Combiné, Courbe, Escalier, Zone et Nuage');
             }
 
-            updateDualAxisPanelVisibility();
+            updateDualAxisPanelVisibility(source === 'dualYAxis' && state.dualYAxis);
             if (source === 'dualYAxis' || source === 'stacked') {
                 renderSeriesList();
+                renderAnnotationsList();
             }
 
             const needsRecreate = (source === 'trendline' || source === 'stacked' || source === 'average' || source === 'dualYAxis');
@@ -2049,6 +2779,7 @@
             updateDualAxisPanelVisibility();
             renderSeriesList();
             renderDataList();
+            renderAnnotationsList();
             updateUI(true);
         }
 
@@ -2143,7 +2874,126 @@
             if (p) showToast(`Palette « ${p.name} » appliquée`);
         }
 
-        /* --- Gestion des séries (Combo + Double axe Y) --- */
+        /* --- Gestion des séries (Combo + Double axe Y + Réordonnancement) --- */
+        function moveSeries(fromIdx, toIdx) {
+            if (
+                fromIdx === toIdx ||
+                fromIdx < 0 ||
+                toIdx < 0 ||
+                fromIdx >= state.series.length ||
+                toIdx >= state.series.length
+            ) {
+                return;
+            }
+
+            const [movedSeries] = state.series.splice(fromIdx, 1);
+            state.series.splice(toIdx, 0, movedSeries);
+
+            // Réordonner les valeurs et flags d'estimation correspondants dans chaque ligne de données
+            state.rows.forEach(row => {
+                const [movedVal] = row.values.splice(fromIdx, 1);
+                row.values.splice(toIdx, 0, movedVal ?? 0);
+                if (!Array.isArray(row.estimated)) row.estimated = state.series.map(() => false);
+                const [movedEst] = row.estimated.splice(fromIdx, 1);
+                row.estimated.splice(toIdx, 0, Boolean(movedEst));
+            });
+
+            if (lastSortDir !== null && !state.stacked) {
+                lastSortDir = null;
+                updateSortButtonsUI();
+            }
+
+            // Mettre à jour l'affectation gauche (1re série) / droite (2e série)
+            syncPrimaryDualAxes();
+
+            renderSeriesList();
+            renderDataList();
+            updateUI(true);
+        }
+
+        function attachSeriesDragHandlers(cardEl, handleEl, sIdx) {
+            handleEl.addEventListener('mousedown', () => {
+                cardEl.setAttribute('draggable', 'true');
+                const cleanup = () => {
+                    if (draggedSeriesIndex === null) cardEl.removeAttribute('draggable');
+                };
+                window.addEventListener('mouseup', cleanup, { once: true });
+            });
+
+            cardEl.addEventListener('dragstart', (e) => {
+                draggedSeriesIndex = sIdx;
+                cardEl.classList.add('is-dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', 'series:' + sIdx);
+            });
+
+            cardEl.addEventListener('dragend', () => {
+                draggedSeriesIndex = null;
+                cardEl.removeAttribute('draggable');
+                cardEl.classList.remove('is-dragging');
+                document.querySelectorAll('#seriesList .series-card').forEach(el => {
+                    el.classList.remove('drag-over-top', 'drag-over-bottom');
+                });
+            });
+
+            cardEl.addEventListener('dragover', (e) => {
+                if (draggedSeriesIndex === null || draggedSeriesIndex === sIdx) return;
+                e.preventDefault();
+                e.stopPropagation();
+                e.dataTransfer.dropEffect = 'move';
+                const rect = cardEl.getBoundingClientRect();
+                const isAfter = (e.clientY - rect.top) > (rect.height / 2);
+                cardEl.classList.toggle('drag-over-top', !isAfter);
+                cardEl.classList.toggle('drag-over-bottom', isAfter);
+            });
+
+            cardEl.addEventListener('dragleave', () => {
+                cardEl.classList.remove('drag-over-top', 'drag-over-bottom');
+            });
+
+            cardEl.addEventListener('drop', (e) => {
+                if (draggedSeriesIndex === null) return;
+                e.preventDefault();
+                e.stopPropagation();
+                const rect = cardEl.getBoundingClientRect();
+                const isAfter = (e.clientY - rect.top) > (rect.height / 2);
+                let targetIdx = isAfter ? sIdx + 1 : sIdx;
+                if (draggedSeriesIndex < targetIdx) targetIdx -= 1;
+
+                const fromIdx = draggedSeriesIndex;
+                draggedSeriesIndex = null;
+                cardEl.classList.remove('drag-over-top', 'drag-over-bottom');
+                if (fromIdx !== targetIdx) {
+                    moveSeries(fromIdx, targetIdx);
+                }
+            });
+        }
+
+        function createSeriesReorderControls(sIdx) {
+            const stack = document.createElement('div');
+            stack.className = 'reorder-stack';
+
+            const upBtn = document.createElement('button');
+            upBtn.type = 'button';
+            upBtn.className = 'btn-reorder';
+            upBtn.title = 'Monter cette série';
+            upBtn.disabled = sIdx === 0;
+            upBtn.innerHTML = '<i data-lucide="chevron-up"></i>';
+            upBtn.onclick = () => moveSeries(sIdx, sIdx - 1);
+
+            const downBtn = document.createElement('button');
+            downBtn.type = 'button';
+            downBtn.className = 'btn-reorder';
+            downBtn.title = 'Descendre cette série';
+            downBtn.disabled = sIdx === state.series.length - 1;
+            downBtn.innerHTML = '<i data-lucide="chevron-down"></i>';
+            downBtn.onclick = () => moveSeries(sIdx, sIdx + 1);
+
+            stack.appendChild(upBtn);
+            stack.appendChild(downBtn);
+            return stack;
+        }
+
         function renderSeriesList() {
             const container = document.getElementById('seriesList');
             const hint = document.getElementById('circularHint');
@@ -2163,9 +3013,18 @@
                 const card = document.createElement('div');
                 card.className = 'series-card' + (hasSubcontrols ? ' has-controls' : '');
 
+                const canReorder = !isCirc && state.series.length > 1;
                 const row = document.createElement('div');
-                const canRemove = !isCirc && state.series.length > 1;
-                row.className = 'series-row' + (canRemove ? '' : ' single-series');
+                row.className = 'series-row' + (canReorder ? '' : ' single-series');
+
+                let handleEl = null;
+                if (canReorder) {
+                    handleEl = document.createElement('div');
+                    handleEl.className = 'drag-handle';
+                    handleEl.title = 'Glisser pour réordonner cette série';
+                    handleEl.innerHTML = '<i data-lucide="grip-vertical"></i>';
+                    row.appendChild(handleEl);
+                }
 
                 const colorInput = document.createElement('input');
                 colorInput.type = 'color';
@@ -2196,7 +3055,10 @@
                 row.appendChild(colorInput);
                 row.appendChild(nameInput);
 
-                if (canRemove) {
+                if (canReorder) {
+                    const reorderStack = createSeriesReorderControls(sIdx);
+                    row.appendChild(reorderStack);
+
                     const rmBtn = document.createElement('button');
                     rmBtn.type = 'button';
                     rmBtn.className = 'btn-remove';
@@ -2261,6 +3123,10 @@
                     card.appendChild(sub);
                 }
 
+                if (canReorder && handleEl) {
+                    attachSeriesDragHandlers(card, handleEl, sIdx);
+                }
+
                 container.appendChild(card);
             });
 
@@ -2269,28 +3135,56 @@
 
         function addSeries() {
             const cols = getPaletteColors(state.activePalette || 'nordic', isDarkMode);
+            const wasSingleSeries = state.series.length === 1;
             const nextIdx = state.series.length;
             const defaultType = state.chartType === 'combo' ? 'line' : (nextIdx === 0 ? 'column' : 'line');
-            const shouldAssignRight = state.dualYAxis && !state.series.some(s => Number(s.yAxis) === 1);
+
+            // Active automatiquement le double axe Y dès qu'on passe à plusieurs séries (hors mode empilé)
+            if (wasSingleSeries && !state.stacked) {
+                state.dualYAxis = true;
+                document.getElementById('dualYAxis').checked = true;
+            }
 
             state.series.push({
                 name: `Série ${nextIdx + 1}`,
                 color: cols[nextIdx % cols.length],
                 type: defaultType,
-                yAxis: shouldAssignRight ? 1 : 0
+                yAxis: (state.dualYAxis && nextIdx === 1) ? 1 : 0
             });
-            state.rows.forEach(r => r.values.push(0));
+            state.rows.forEach(r => {
+                r.values.push(0);
+                if (!Array.isArray(r.estimated)) r.estimated = [];
+                r.estimated.push(false);
+            });
+
+            syncPrimaryDualAxes();
+            updateDualAxisPanelVisibility(state.dualYAxis);
             renderSeriesList();
             renderDataList();
+            renderAnnotationsList();
             updateUI(true);
         }
 
         function removeSeries(sIdx) {
             if (state.series.length <= 1) return;
             state.series.splice(sIdx, 1);
-            state.rows.forEach(r => r.values.splice(sIdx, 1));
+            state.rows.forEach(r => {
+                r.values.splice(sIdx, 1);
+                if (Array.isArray(r.estimated)) r.estimated.splice(sIdx, 1);
+            });
+
+            if (state.series.length < 2) {
+                state.series[0].yAxis = 0;
+                state.dualYAxis = false;
+                document.getElementById('dualYAxis').checked = false;
+            } else {
+                syncPrimaryDualAxes();
+            }
+
+            updateDualAxisPanelVisibility();
             renderSeriesList();
             renderDataList();
+            renderAnnotationsList();
             updateUI(true);
         }
 
@@ -2468,6 +3362,7 @@
                     labelInput.value = rowData.label;
                     labelInput.oninput = (e) => {
                         state.rows[rIdx].label = e.target.value;
+                        refreshCategorySuggestions();
                         updateUI(false);
                     };
 
@@ -2479,6 +3374,7 @@
                     hideCb.onchange = (e) => {
                         state.rows[rIdx].hidden = e.target.checked;
                         rowEl.classList.toggle('hidden-row', e.target.checked);
+                        refreshCategorySuggestions();
                         updateUI(false);
                     };
 
@@ -2500,8 +3396,9 @@
                     valuesWrap.className = 'data-row-values';
 
                     state.series.forEach((s, sIdx) => {
+                        const isEst = Boolean(rowData.estimated && rowData.estimated[sIdx]);
                         const field = document.createElement('div');
-                        field.className = 'series-val-field';
+                        field.className = 'series-val-field' + (isEst ? ' is-estimated' : '');
 
                         const lbl = document.createElement('div');
                         lbl.className = 'series-val-label';
@@ -2514,9 +3411,26 @@
                         const txt = document.createElement('span');
                         txt.textContent = s.name || `Série ${sIdx + 1}`;
                         txt.setAttribute('data-series-name', sIdx);
+                        txt.style.overflow = 'hidden';
+                        txt.style.textOverflow = 'ellipsis';
+
+                        const estBtn = document.createElement('button');
+                        estBtn.type = 'button';
+                        estBtn.className = 'btn-est-mini' + (isEst ? ' active' : '');
+                        estBtn.textContent = 'Est.';
+                        estBtn.title = isEst ? 'Donnée marquée comme estimation (cliquer pour retirer)' : 'Marquer cette valeur comme estimation (opacité réduite)';
+                        estBtn.onclick = () => {
+                            if (!Array.isArray(state.rows[rIdx].estimated)) {
+                                state.rows[rIdx].estimated = state.series.map(() => false);
+                            }
+                            state.rows[rIdx].estimated[sIdx] = !state.rows[rIdx].estimated[sIdx];
+                            renderDataList();
+                            updateUI(true);
+                        };
 
                         lbl.appendChild(dot);
                         lbl.appendChild(txt);
+                        lbl.appendChild(estBtn);
 
                         const valInput = document.createElement('input');
                         valInput.type = 'number';
@@ -2535,9 +3449,11 @@
 
                     rowEl.appendChild(valuesWrap);
                 } else {
+                    const isEstSingle = Boolean(rowData.estimated && rowData.estimated[0]);
                     rowEl.className = 'data-row'
                         + (showRowColorPicker ? '' : ' no-row-color')
-                        + (rowData.hidden ? ' hidden-row' : '');
+                        + (rowData.hidden ? ' hidden-row' : '')
+                        + (isEstSingle ? ' is-estimated-single' : '');
 
                     rowEl.appendChild(handleEl);
 
@@ -2561,6 +3477,7 @@
                     labelInput.value = rowData.label;
                     labelInput.oninput = (e) => {
                         state.rows[rIdx].label = e.target.value;
+                        refreshCategorySuggestions();
                         updateUI(false);
                     };
 
@@ -2574,6 +3491,20 @@
                         updateUI(false);
                     };
 
+                    const estBtn = document.createElement('button');
+                    estBtn.type = 'button';
+                    estBtn.className = 'btn-est' + (isEstSingle ? ' active' : '');
+                    estBtn.textContent = 'Est.';
+                    estBtn.title = isEstSingle ? 'Donnée marquée comme estimation (cliquer pour retirer)' : 'Marquer comme estimation (opacité réduite)';
+                    estBtn.onclick = () => {
+                        if (!Array.isArray(state.rows[rIdx].estimated)) {
+                            state.rows[rIdx].estimated = state.series.map(() => false);
+                        }
+                        state.rows[rIdx].estimated[0] = !state.rows[rIdx].estimated[0];
+                        renderDataList();
+                        updateUI(true);
+                    };
+
                     const hideCb = document.createElement('input');
                     hideCb.type = 'checkbox';
                     hideCb.className = 'hide-checkbox';
@@ -2582,6 +3513,7 @@
                     hideCb.onchange = (e) => {
                         state.rows[rIdx].hidden = e.target.checked;
                         rowEl.classList.toggle('hidden-row', e.target.checked);
+                        refreshCategorySuggestions();
                         updateUI(false);
                     };
 
@@ -2594,6 +3526,7 @@
 
                     rowEl.appendChild(labelInput);
                     rowEl.appendChild(valInput);
+                    rowEl.appendChild(estBtn);
                     rowEl.appendChild(reorderStack);
                     rowEl.appendChild(hideCb);
                     rowEl.appendChild(rmBtn);
@@ -2603,6 +3536,7 @@
                 container.appendChild(rowEl);
             });
 
+            refreshCategorySuggestions();
             lucide.createIcons();
         }
 
@@ -2614,6 +3548,7 @@
                 id: newId,
                 label: `Item ${nextIdx + 1}`,
                 values: state.series.map(() => 0),
+                estimated: state.series.map(() => false),
                 color: cols[nextIdx % cols.length],
                 hidden: false
             });
@@ -2718,6 +3653,7 @@
             const cols = getPaletteColors(state.activePalette || 'nordic', isDarkMode);
 
             const seriesCount = maxCols - 1;
+            const enableDualY = seriesCount >= 2 && !state.stacked;
             const newSeries = [];
             for (let c = 0; c < seriesCount; c++) {
                 const rawName = headerRow && headerRow[c + 1] !== undefined ? String(headerRow[c + 1]).trim() : '';
@@ -2725,7 +3661,7 @@
                     name: rawName || `Série ${c + 1}`,
                     color: cols[c % cols.length],
                     type: c === 0 ? 'column' : 'line',
-                    yAxis: 0
+                    yAxis: (enableDualY && c === 1) ? 1 : 0
                 });
             }
 
@@ -2745,6 +3681,7 @@
                     id: nextRowId(),
                     label: label || `Ligne ${newRows.length + 1}`,
                     values: vals,
+                    estimated: newSeries.map(() => false),
                     color: cols[newRows.length % cols.length],
                     hidden: false
                 });
@@ -2757,11 +3694,15 @@
 
             state.series = newSeries;
             state.rows = newRows;
+            state.dualYAxis = enableDualY;
+            document.getElementById('dualYAxis').checked = enableDualY;
+            updateDualAxisPanelVisibility();
             unsortedOrderIds = state.rows.map(r => r.id);
             lastSortDir = null;
             updateSortButtonsUI();
             renderSeriesList();
             renderDataList();
+            renderAnnotationsList();
             updateUI(true);
             showToast(`${newRows.length} ligne${newRows.length > 1 ? 's' : ''} et ${newSeries.length} série${newSeries.length > 1 ? 's' : ''} importées (${fileName})`);
         }
@@ -2808,23 +3749,468 @@
             const sidebar = document.getElementById('sidebar');
             ['dragenter', 'dragover'].forEach(evtName => {
                 sidebar.addEventListener(evtName, (e) => {
-                    if (draggedRowIndex !== null) return;
+                    if (draggedRowIndex !== null || draggedSeriesIndex !== null) return;
                     e.preventDefault();
                     sidebar.classList.add('drag-over');
                 });
             });
             ['dragleave', 'drop'].forEach(evtName => {
                 sidebar.addEventListener(evtName, (e) => {
-                    if (draggedRowIndex !== null) return;
+                    if (draggedRowIndex !== null || draggedSeriesIndex !== null) return;
                     e.preventDefault();
                     sidebar.classList.remove('drag-over');
                 });
             });
             sidebar.addEventListener('drop', (e) => {
-                if (draggedRowIndex !== null) return;
+                if (draggedRowIndex !== null || draggedSeriesIndex !== null) return;
                 const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
                 if (file) processImportedFile(file);
             });
+        }
+
+        /* --- Gestion des Repères & Annotations --- */
+        function refreshCategorySuggestions() {
+            const dl = document.getElementById('categorySuggestions');
+            if (!dl) return;
+            dl.innerHTML = '';
+            const seen = new Set();
+            state.rows.forEach(r => {
+                const lbl = (r.label || '').trim();
+                if (lbl && !r.hidden && !seen.has(lbl)) {
+                    seen.add(lbl);
+                    const opt = document.createElement('option');
+                    opt.value = lbl;
+                    dl.appendChild(opt);
+                }
+            });
+        }
+
+        function renderAnnotationsList() {
+            const container = document.getElementById('annotationsList');
+            const hint = document.getElementById('annotationsHint');
+            const addBtn = document.getElementById('addAnnotationBtn');
+            if (!container) return;
+
+            const isCartesian = !isCircularType(state.chartType) && state.chartType !== 'radar';
+            const dualY = state.dualYAxis && supportsDualAxis(state.chartType) && state.series.length >= 2;
+            if (hint) hint.style.display = isCartesian ? 'none' : 'block';
+            if (addBtn) addBtn.style.display = isCartesian ? 'inline-flex' : 'none';
+
+            container.innerHTML = '';
+            if (!isCartesian) return;
+
+            (state.annotations || []).forEach((ann, idx) => {
+                const card = document.createElement('div');
+                card.className = 'annotation-card';
+
+                const top = document.createElement('div');
+                top.className = 'annotation-top';
+
+                const leftControls = document.createElement('div');
+                leftControls.style.display = 'flex';
+                leftControls.style.alignItems = 'center';
+                leftControls.style.gap = '6px';
+
+                const axisSeg = document.createElement('div');
+                axisSeg.className = 'segmented-group';
+                [
+                    { val: 'x', label: 'Axe X (Date)' },
+                    { val: 'y', label: 'Axe Y (Seuil)' }
+                ].forEach(def => {
+                    const b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'segmented-btn' + (ann.axis === def.val ? ' active' : '');
+                    b.textContent = def.label;
+                    b.onclick = () => {
+                        state.annotations[idx].axis = def.val;
+                        if (def.val === 'x' && !state.rows.some(r => r.label === state.annotations[idx].value)) {
+                            const firstVis = state.rows.find(r => !r.hidden && r.label.trim());
+                            state.annotations[idx].value = firstVis ? firstVis.label : '';
+                        } else if (def.val === 'y' && Number.isNaN(Number(state.annotations[idx].value))) {
+                            state.annotations[idx].value = '';
+                        }
+                        renderAnnotationsList();
+                        updateUI(true);
+                    };
+                    axisSeg.appendChild(b);
+                });
+                leftControls.appendChild(axisSeg);
+
+                if (ann.axis === 'y' && dualY) {
+                    const sideSeg = document.createElement('div');
+                    sideSeg.className = 'segmented-group';
+                    [{ val: 0, label: 'G' }, { val: 1, label: 'D' }].forEach(def => {
+                        const b = document.createElement('button');
+                        b.type = 'button';
+                        b.className = 'segmented-btn' + ((Number(ann.yAxis) === 1 ? 1 : 0) === def.val ? ' active' : '');
+                        b.textContent = def.label;
+                        b.title = def.val === 0 ? 'Seuil sur l’axe Y gauche' : 'Seuil sur l’axe Y droit';
+                        b.onclick = () => {
+                            state.annotations[idx].yAxis = def.val;
+                            renderAnnotationsList();
+                            updateUI(true);
+                        };
+                        sideSeg.appendChild(b);
+                    });
+                    leftControls.appendChild(sideSeg);
+                }
+
+                const rightControls = document.createElement('div');
+                rightControls.className = 'annotation-top-right';
+
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = ann.color || '#f59e0b';
+                colorInput.title = 'Couleur du repère';
+                colorInput.oninput = (e) => {
+                    state.annotations[idx].color = e.target.value;
+                    updateUI(true);
+                };
+
+                const rmBtn = document.createElement('button');
+                rmBtn.type = 'button';
+                rmBtn.className = 'btn-remove';
+                rmBtn.title = 'Supprimer ce repère';
+                rmBtn.innerHTML = '<i data-lucide="x" style="width: 14px;"></i>';
+                rmBtn.onclick = () => removeAnnotation(idx);
+
+                rightControls.appendChild(colorInput);
+                rightControls.appendChild(rmBtn);
+
+                top.appendChild(leftControls);
+                top.appendChild(rightControls);
+
+                const fields = document.createElement('div');
+                fields.className = 'annotation-fields';
+
+                const valInput = document.createElement('input');
+                if (ann.axis === 'x') {
+                    valInput.type = 'text';
+                    valInput.setAttribute('list', 'categorySuggestions');
+                    valInput.placeholder = 'Catégorie (ex: Avril 2025)';
+                } else {
+                    valInput.type = 'number';
+                    valInput.step = 'any';
+                    valInput.placeholder = 'Valeur Y (ex: 150)';
+                }
+                valInput.value = ann.value ?? '';
+                valInput.oninput = (e) => {
+                    state.annotations[idx].value = e.target.value;
+                    updateUI(true);
+                };
+
+                const lblInput = document.createElement('input');
+                lblInput.type = 'text';
+                lblInput.placeholder = 'Libellé (ex: Split 10:1)';
+                lblInput.value = ann.label || '';
+                lblInput.oninput = (e) => {
+                    state.annotations[idx].label = e.target.value;
+                    updateUI(true);
+                };
+
+                fields.appendChild(valInput);
+                fields.appendChild(lblInput);
+
+                card.appendChild(top);
+                card.appendChild(fields);
+                container.appendChild(card);
+            });
+
+            refreshCategorySuggestions();
+            lucide.createIcons();
+        }
+
+        function addAnnotation() {
+            const visibleRows = state.rows.filter(r => !r.hidden && r.label.trim() !== '');
+            const defaultCat = visibleRows.length
+                ? visibleRows[Math.floor(visibleRows.length / 2)].label
+                : '';
+            const paletteAccents = ['#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#10b981'];
+            const nextColor = paletteAccents[state.annotations.length % paletteAccents.length];
+
+            state.annotations.push({
+                id: nextAnnotationId(),
+                axis: 'x',
+                value: defaultCat,
+                label: `Évènement ${state.annotations.length + 1}`,
+                color: nextColor,
+                yAxis: 0
+            });
+            renderAnnotationsList();
+            updateUI(true);
+        }
+
+        function removeAnnotation(idx) {
+            state.annotations.splice(idx, 1);
+            renderAnnotationsList();
+            updateUI(true);
+        }
+
+        /* --- Bibliothèque Locale de Graphiques (localStorage) --- */
+        function readLibraryFromStorage() {
+            try {
+                const raw = localStorage.getItem(LIBRARY_STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : [];
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.warn('Lecture bibliothèque impossible:', e);
+                return [];
+            }
+        }
+
+        function writeLibraryToStorage(items) {
+            try {
+                localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(items));
+                updateLibraryCountBadge(items.length);
+            } catch (e) {
+                console.warn('Écriture bibliothèque impossible:', e);
+                showToast('Espace localStorage insuffisant', true);
+            }
+        }
+
+        function updateLibraryCountBadge(count = null) {
+            const badge = document.getElementById('libraryCountBadge');
+            if (!badge) return;
+            const n = count === null ? readLibraryFromStorage().length : count;
+            badge.textContent = String(n);
+            badge.style.display = n > 0 ? 'inline-flex' : 'none';
+        }
+
+        function formatLibraryDate(isoStr) {
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
+                    + ' · '
+                    + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function resetClearLibraryButton() {
+            clearTimeout(clearLibraryConfirmTimer);
+            const btn = document.getElementById('clearLibraryBtn');
+            if (!btn) return;
+            btn.classList.remove('confirming');
+            btn.dataset.confirm = '';
+            btn.innerHTML = '<i data-lucide="trash-2"></i> Tout vider';
+            lucide.createIcons();
+        }
+
+        function renderLibraryModalList() {
+            const listEl = document.getElementById('libraryList');
+            const updateBtn = document.getElementById('libraryUpdateBtn');
+            const clearBtn = document.getElementById('clearLibraryBtn');
+            if (!listEl) return;
+
+            const items = readLibraryFromStorage();
+            updateLibraryCountBadge(items.length);
+
+            const hasActive = Boolean(currentLibraryId && items.some(it => it.id === currentLibraryId));
+            if (updateBtn) updateBtn.style.display = hasActive ? 'inline-flex' : 'none';
+            if (clearBtn) {
+                clearBtn.disabled = items.length === 0;
+                clearBtn.style.opacity = items.length === 0 ? '0.4' : '1';
+                clearBtn.style.cursor = items.length === 0 ? 'not-allowed' : 'pointer';
+            }
+
+            if (items.length === 0) {
+                listEl.innerHTML = '<div class="library-empty">Aucun graphique enregistré dans votre bibliothèque locale.<br>Donnez un nom ci-dessus et cliquez sur <b>Enregistrer</b>.</div>';
+                lucide.createIcons();
+                return;
+            }
+
+            listEl.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'library-item' + (item.id === currentLibraryId ? ' is-active' : '');
+
+                const st = item.state || {};
+                const sCount = Array.isArray(st.series) ? st.series.length : 1;
+                const rCount = Array.isArray(st.rows) ? st.rows.length : 0;
+                const typeLbl = CHART_TYPE_LABELS[st.chartType] || st.chartType || 'Graphique';
+                const colors = (Array.isArray(st.series) && st.series.length > 1)
+                    ? st.series.slice(0, 4).map(s => s.color)
+                    : (Array.isArray(st.rows) ? st.rows.slice(0, 4).map(r => r.color) : ['#3b82f6']);
+
+                const swatchesHtml = colors
+                    .map(c => `<span class="palette-dot" style="background:${escapeHtml(c)}; width:9px; height:9px;"></span>`)
+                    .join('');
+
+                card.innerHTML = `
+                    <div class="library-item-info">
+                        <div class="library-item-title-row">
+                            <span class="library-item-swatches">${swatchesHtml}</span>
+                            <span class="library-item-name">${escapeHtml(item.name || 'Sans titre')}</span>
+                            ${item.id === currentLibraryId ? '<span class="library-active-pill">Actif</span>' : ''}
+                        </div>
+                        <div class="library-item-meta">
+                            <span>${escapeHtml(typeLbl)}</span>
+                            <span>•</span>
+                            <span>${sCount} série${sCount > 1 ? 's' : ''} · ${rCount} donnée${rCount > 1 ? 's' : ''}</span>
+                            <span>•</span>
+                            <span>${escapeHtml(formatLibraryDate(item.savedAt))}</span>
+                        </div>
+                    </div>
+                    <div class="library-item-actions">
+                        <button type="button" class="btn-lib-action" title="Charger ce graphique">
+                            <i data-lucide="folder-up"></i> Charger
+                        </button>
+                        <button type="button" class="btn-lib-action" title="Dupliquer dans la bibliothèque" style="padding: 0 7px;">
+                            <i data-lucide="copy"></i>
+                        </button>
+                        <button type="button" class="btn-lib-danger" title="Supprimer de la bibliothèque">
+                            <i data-lucide="trash-2"></i>
+                        </button>
+                    </div>
+                `;
+
+                const actionBtns = card.querySelectorAll('.library-item-actions button');
+                actionBtns[0].onclick = () => loadChartFromLibrary(item.id);
+                actionBtns[1].onclick = () => duplicateChartInLibrary(item.id);
+                actionBtns[2].onclick = () => deleteChartFromLibrary(item.id);
+
+                listEl.appendChild(card);
+            });
+
+            lucide.createIcons();
+        }
+
+        function openLibraryModal() {
+            const nameInput = document.getElementById('librarySaveName');
+            if (nameInput) {
+                const items = readLibraryFromStorage();
+                const activeItem = currentLibraryId ? items.find(i => i.id === currentLibraryId) : null;
+                nameInput.value = state.title.trim() || (activeItem ? activeItem.name : '') || 'Mon graphique';
+            }
+            resetClearLibraryButton();
+            renderLibraryModalList();
+            document.getElementById('libraryModal').classList.add('open');
+            lucide.createIcons();
+        }
+
+        function closeLibraryModal() {
+            resetClearLibraryButton();
+            document.getElementById('libraryModal').classList.remove('open');
+        }
+
+        function saveChartToLibrary(overwriteActive = false) {
+            const nameInput = document.getElementById('librarySaveName');
+            const rawName = (nameInput ? nameInput.value : '').trim();
+            const chartName = rawName || state.title.trim() || 'Graphique sans titre';
+            const items = readLibraryFromStorage();
+            const snapshot = JSON.parse(JSON.stringify(state));
+
+            if (overwriteActive && currentLibraryId) {
+                const idx = items.findIndex(it => it.id === currentLibraryId);
+                if (idx !== -1) {
+                    items[idx] = {
+                        ...items[idx],
+                        name: chartName,
+                        savedAt: new Date().toISOString(),
+                        dark: isDarkMode,
+                        state: snapshot
+                    };
+                    const [updated] = items.splice(idx, 1);
+                    items.unshift(updated);
+                    writeLibraryToStorage(items);
+                    renderLibraryModalList();
+                    showToast(`« ${chartName} » mis à jour !`);
+                    return;
+                }
+            }
+
+            const newId = 'lib_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+            items.unshift({
+                id: newId,
+                name: chartName,
+                savedAt: new Date().toISOString(),
+                dark: isDarkMode,
+                state: snapshot
+            });
+            currentLibraryId = newId;
+            writeLibraryToStorage(items);
+            renderLibraryModalList();
+            showToast(`« ${chartName} » enregistré dans la bibliothèque !`);
+        }
+
+        function loadChartFromLibrary(id) {
+            const items = readLibraryFromStorage();
+            const found = items.find(it => it.id === id);
+            if (!found || !found.state) return;
+
+            state = { ...createDefaultState(isDarkMode), ...JSON.parse(JSON.stringify(found.state)) };
+            ensureRowIdsAndSanitize();
+            currentLibraryId = found.id;
+            lastSortDir = null;
+            updateSortButtonsUI();
+
+            if (typeof found.dark === 'boolean' && found.dark !== isDarkMode) {
+                applyTheme(found.dark, false);
+            }
+
+            syncControlsFromState();
+            renderRatios();
+            renderPalettes();
+            renderSeriesList();
+            renderDataList();
+            renderAnnotationsList();
+            applyAspectRatioLayout();
+            updateUI(true);
+            closeLibraryModal();
+            showToast(`« ${found.name} » chargé !`);
+        }
+
+        function duplicateChartInLibrary(id) {
+            const items = readLibraryFromStorage();
+            const idx = items.findIndex(it => it.id === id);
+            if (idx === -1) return;
+            const orig = items[idx];
+            const copy = {
+                id: 'lib_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+                name: `${orig.name} (copie)`,
+                savedAt: new Date().toISOString(),
+                dark: orig.dark,
+                state: JSON.parse(JSON.stringify(orig.state))
+            };
+            items.splice(idx, 0, copy);
+            writeLibraryToStorage(items);
+            renderLibraryModalList();
+            showToast(`Copie de « ${orig.name} » créée`);
+        }
+
+        function deleteChartFromLibrary(id) {
+            const items = readLibraryFromStorage();
+            const target = items.find(it => it.id === id);
+            const remaining = items.filter(it => it.id !== id);
+            if (currentLibraryId === id) currentLibraryId = null;
+            writeLibraryToStorage(remaining);
+            renderLibraryModalList();
+            showToast(target ? `« ${target.name} » supprimé` : 'Graphique supprimé');
+        }
+
+        function clearLocalLibrary() {
+            const items = readLibraryFromStorage();
+            if (items.length === 0) return;
+            const btn = document.getElementById('clearLibraryBtn');
+            if (!btn) return;
+
+            if (btn.dataset.confirm !== 'yes') {
+                btn.dataset.confirm = 'yes';
+                btn.classList.add('confirming');
+                btn.innerHTML = '<i data-lucide="alert-triangle"></i> Confirmer : tout vider ?';
+                lucide.createIcons();
+                clearTimeout(clearLibraryConfirmTimer);
+                clearLibraryConfirmTimer = setTimeout(resetClearLibraryButton, 3500);
+                return;
+            }
+
+            localStorage.removeItem(LIBRARY_STORAGE_KEY);
+            currentLibraryId = null;
+            resetClearLibraryButton();
+            updateLibraryCountBadge(0);
+            renderLibraryModalList();
+            showToast('Bibliothèque locale vidée');
         }
 
         /* --- Calculs statistiques : Régression linéaire & Moyenne --- */
@@ -2879,30 +4265,118 @@
         /* --- Hauteur dynamique (Plein écran, Embed, Ratio fixe, ou Auto) --- */
         function getChartHeight() {
             const titleEl = document.getElementById('displayTitle');
+            const subtitleEl = document.getElementById('displaySubtitle');
             const avgEl = document.getElementById('avgBadge');
             const hasTitle = titleEl && titleEl.style.display !== 'none' && titleEl.textContent.trim() !== '';
+            const hasSubtitle = subtitleEl && subtitleEl.style.display !== 'none' && subtitleEl.textContent.trim() !== '';
             const hasAvgBadge = avgEl && avgEl.style.display !== 'none';
-            const titleHeight = hasTitle ? (titleEl.offsetHeight + 20) : 0;
+            const titleHeight = hasTitle ? (titleEl.offsetHeight + (hasSubtitle ? 6 : 20)) : 0;
+            const subtitleHeight = hasSubtitle ? (subtitleEl.offsetHeight + 18) : 0;
             const avgHeight = hasAvgBadge ? (avgEl.offsetHeight + 12) : 0;
+            const headerOffset = titleHeight + subtitleHeight + avgHeight;
 
             if (isEmbedMode) {
                 const containerPadding = 94;
-                return Math.max(220, Math.floor(window.innerHeight - containerPadding - titleHeight - avgHeight));
+                return Math.max(220, Math.floor(window.innerHeight - containerPadding - headerOffset));
             }
 
             if (getFullscreenElement()) {
                 const verticalChrome = (window.innerHeight * 0.02) + 52;
-                return Math.max(320, Math.floor(window.innerHeight - verticalChrome - titleHeight - avgHeight));
+                return Math.max(320, Math.floor(window.innerHeight - verticalChrome - headerOffset));
             }
 
             if (state.aspectRatio !== 'auto') {
                 const stage = document.getElementById('exportStage');
                 const stageH = stage.clientHeight || 480;
                 const containerPadding = 94;
-                return Math.max(200, Math.floor(stageH - containerPadding - titleHeight - avgHeight));
+                return Math.max(200, Math.floor(stageH - containerPadding - headerOffset));
             }
 
             return 420;
+        }
+
+        /* --- Helpers Post-Rendu : Légende 1 ligne + Style Estimations --- */
+        function fitLegendSingleLine(rootEl) {
+            const host = rootEl || document.querySelector('#mainChart');
+            if (!host) return;
+            const legend = host.querySelector('.apexcharts-legend');
+            if (!legend) return;
+
+            legend.style.flexWrap = 'nowrap';
+            legend.style.justifyContent = 'center';
+            legend.style.fontSize = '';
+            legend.style.gap = '0 14px';
+
+            const available = host.clientWidth ? (host.clientWidth - 16) : 0;
+            if (available > 0 && legend.scrollWidth > available) {
+                legend.style.gap = '0 9px';
+                const texts = legend.querySelectorAll('.apexcharts-legend-text');
+                texts.forEach(t => { t.style.fontSize = '11.5px'; });
+                if (legend.scrollWidth > available) {
+                    legend.style.gap = '0 6px';
+                    texts.forEach(t => { t.style.fontSize = '10.5px'; });
+                }
+            }
+        }
+
+        function applyEstimatedStyling(rootEl, estMeta) {
+            const host = rootEl || document.querySelector('#mainChart');
+            if (!host || !estMeta || !estMeta.hasAnyEstimated) return;
+
+            const matrix = estMeta.estimatedMatrix || [];
+            const colors = estMeta.estimatedColors || [];
+            const isCirc = Boolean(estMeta.isCirc);
+
+            if (isCirc) {
+                const pieGroups = host.querySelectorAll('.apexcharts-pie-series, .apexcharts-radial-series');
+                pieGroups.forEach((group, fallbackIdx) => {
+                    const attrIdx = group.getAttribute('data:realIndex');
+                    const relIdx = group.getAttribute('rel');
+                    const rIdx = attrIdx !== null ? Number(attrIdx) : (relIdx !== null ? Number(relIdx) - 1 : fallbackIdx);
+                    if (matrix[0] && matrix[0][rIdx]) {
+                        const path = group.querySelector('path');
+                        if (path) {
+                            path.classList.add('myplot-estimated-slice');
+                            path.setAttribute('fill-opacity', '0.38');
+                            if (colors[0] && colors[0][rIdx]) {
+                                path.setAttribute('stroke', colors[0][rIdx]);
+                            }
+                            path.setAttribute('stroke-width', '2');
+                            path.setAttribute('stroke-dasharray', '5 3');
+                        }
+                    }
+                });
+                return;
+            }
+
+            // Barres / Colonnes (mono-série, multi-séries, combo)
+            const barGroups = host.querySelectorAll('.apexcharts-bar-series .apexcharts-series');
+            barGroups.forEach((group, fallbackIdx) => {
+                const attrIdx = group.getAttribute('data:realIndex');
+                const relIdx = group.getAttribute('rel');
+                const sIdx = attrIdx !== null ? Number(attrIdx) : (relIdx !== null ? Number(relIdx) - 1 : fallbackIdx);
+                const rowFlags = matrix[sIdx];
+                if (!rowFlags) return;
+
+                group.querySelectorAll('.apexcharts-bar-area').forEach((bar) => {
+                    const jAttr = bar.getAttribute('j');
+                    const j = jAttr !== null ? Number(jAttr) : -1;
+                    if (j >= 0 && rowFlags[j]) {
+                        const col = (colors[sIdx] && colors[sIdx][j]) || bar.getAttribute('fill') || '#3b82f6';
+                        bar.classList.add('myplot-estimated-bar');
+                        bar.setAttribute('fill-opacity', '0.36');
+                        bar.setAttribute('stroke', col);
+                        bar.setAttribute('stroke-width', '2');
+                        bar.setAttribute('stroke-dasharray', '5 3');
+                        bar.setAttribute('stroke-opacity', '0.95');
+                    }
+                });
+            });
+        }
+
+        function applyPostRenderPolish(rootEl, estMeta) {
+            fitLegendSingleLine(rootEl);
+            applyEstimatedStyling(rootEl, estMeta);
         }
 
         /* --- Construction des options ApexCharts + métadonnées pour export HTML --- */
@@ -3023,13 +4497,23 @@
                 ? rowColors
                 : (canTrendline ? [...seriesColors, trendColor] : seriesColors);
 
-            // Unités par série (utile pour tooltips, dataLabels et export HTML)
-            const leftUnit = dualYAxisActive ? (state.leftAxisUnit || '').trim() : '';
+            // Matrice des données estimées (pour style réduit + tooltip "(Est.)")
+            const estimatedMatrix = isCirc
+                ? [visibleRows.map(r => Boolean(r.estimated && r.estimated[0]))]
+                : state.series.map((_, sIdx) => visibleRows.map(r => Boolean(r.estimated && r.estimated[sIdx])));
+            const estimatedColors = isCirc
+                ? [visibleRows.map(r => r.color)]
+                : state.series.map((s, sIdx) => visibleRows.map(r => (isSingleSeriesBar ? r.color : s.color)));
+            const hasAnyEstimated = estimatedMatrix.some(arr => arr.some(Boolean));
+            const estimatedMeta = { isCirc, estimatedMatrix, estimatedColors, hasAnyEstimated };
+
+            // Unités par série (valable en axe unique comme en double axe Y)
+            const leftUnit = (!isCirc && !isRadar) ? (state.leftAxisUnit || '').trim() : '';
             const rightUnit = dualYAxisActive ? (state.rightAxisUnit || '').trim() : '';
             const seriesUnits = isCirc
                 ? []
                 : apexSeries.map((_, idx) => {
-                    if (!dualYAxisActive) return '';
+                    if (!dualYAxisActive) return leftUnit;
                     if (idx >= dataSeriesCount) return leftUnit;
                     return Number(state.series[idx].yAxis) === 1 ? rightUnit : leftUnit;
                 });
@@ -3143,6 +4627,31 @@
                 markersOptions = { size: 0 };
             }
 
+            // Marqueurs discrets (creux/translucides) pour les points estimés sur lignes / zones / nuages
+            if (!isCirc && hasAnyEstimated) {
+                const discreteMarkers = [];
+                for (let sIdx = 0; sIdx < dataSeriesCount; sIdx++) {
+                    const vType = getSeriesVisualType(sIdx);
+                    if (vType === 'column' || isBar) continue;
+                    const sCol = state.series[sIdx].color;
+                    visibleRows.forEach((r, rIdx) => {
+                        if (r.estimated && r.estimated[sIdx]) {
+                            discreteMarkers.push({
+                                seriesIndex: sIdx,
+                                dataPointIndex: rIdx,
+                                fillColor: hexToRgba(sCol, 0.25),
+                                strokeColor: sCol,
+                                size: isScatter ? 8 : 6,
+                                shape: 'circle'
+                            });
+                        }
+                    });
+                }
+                if (discreteMarkers.length > 0) {
+                    markersOptions.discrete = discreteMarkers;
+                }
+            }
+
             const annotations = { yaxis: [], xaxis: [] };
             if (avgValue !== null && !isCirc && !isRadar) {
                 const avgConfig = {
@@ -3178,14 +4687,51 @@
                 }
             }
 
+            // Bornes manuelles (Min / Max) & Échelle logarithmique
+            const rawLeftMin = parseOptionalBound(state.leftAxisMin);
+            const rawLeftMax = parseOptionalBound(state.leftAxisMax);
+            const rawRightMin = parseOptionalBound(state.rightAxisMin);
+            const rawRightMax = parseOptionalBound(state.rightAxisMax);
+
+            const applyBoundsAndLog = (axisObj, minVal, maxVal, isLog) => {
+                if (isLog) {
+                    axisObj.logarithmic = true;
+                    axisObj.logBase = 10;
+                    if (minVal !== null && minVal > 0 && (maxVal === null || minVal < maxVal)) {
+                        axisObj.min = minVal;
+                    }
+                    if (maxVal !== null && maxVal > 0 && (minVal === null || minVal < maxVal)) {
+                        axisObj.max = maxVal;
+                    }
+                } else {
+                    const boundsValid = (minVal === null || maxVal === null || minVal < maxVal);
+                    if (boundsValid) {
+                        if (minVal !== null) axisObj.min = minVal;
+                        if (maxVal !== null) axisObj.max = maxVal;
+                        if (minVal !== null || maxVal !== null) {
+                            axisObj.forceNiceScale = false;
+                        }
+                    }
+                }
+                return axisObj;
+            };
+
             const xaxisOptions = isHorizontalBar
                 ? {
                     axisBorder: { color: gridColor },
                     axisTicks: { color: gridColor },
+                    ...(rawLeftMin !== null && (rawLeftMax === null || rawLeftMin < rawLeftMax) ? { min: rawLeftMin } : {}),
+                    ...(rawLeftMax !== null && (rawLeftMin === null || rawLeftMin < rawLeftMax) ? { max: rawLeftMax } : {}),
                     labels: {
-                        formatter: formatDecimalsValue,
+                        formatter: (v) => formatWithUnit(v, leftUnit),
                         style: { colors: textColor, fontSize: '12px', fontFamily: fontCss }
-                    }
+                    },
+                    title: state.leftAxisTitle.trim()
+                        ? {
+                            text: state.leftAxisTitle.trim(),
+                            style: { color: textColor, fontSize: '12px', fontWeight: 600, fontFamily: fontCss }
+                        }
+                        : undefined
                 }
                 : (isSingleSeriesBar
                     ? {
@@ -3203,6 +4749,9 @@
 
             let yaxisOptions;
             let yaxisMetaForExport = [];
+            let resolvedPrimaryLeftIdx = 0;
+            let resolvedPrimaryRightIdx = 1;
+
             if (isHorizontalBar) {
                 yaxisOptions = {
                     labels: { style: { colors: textColor, fontSize: '12px', fontFamily: fontCss } }
@@ -3217,6 +4766,8 @@
 
                 const firstLeftIdx = leftSeriesIndices.length ? leftSeriesIndices[0] : -1;
                 const firstRightIdx = rightSeriesIndices.length ? rightSeriesIndices[0] : -1;
+                resolvedPrimaryLeftIdx = firstLeftIdx !== -1 ? firstLeftIdx : 0;
+                resolvedPrimaryRightIdx = firstRightIdx !== -1 ? firstRightIdx : 0;
 
                 const leftAxisColor = leftSeriesIndices.length === 1
                     ? state.series[firstLeftIdx].color
@@ -3233,7 +4784,7 @@
                         const targetLeftIdx = firstLeftIdx !== -1 ? firstLeftIdx : 0;
                         const isPrimary = idx === firstLeftIdx;
                         yaxisMetaForExport.push({ unit: leftUnit });
-                        return {
+                        return applyBoundsAndLog({
                             seriesName: apexSeries[targetLeftIdx].name,
                             show: isPrimary,
                             opposite: false,
@@ -3249,12 +4800,12 @@
                                     style: { color: leftAxisColor, fontSize: '12px', fontWeight: 600, fontFamily: fontCss }
                                 }
                                 : undefined
-                        };
+                        }, rawLeftMin, rawLeftMax, state.leftAxisLog);
                     } else {
                         const targetRightIdx = firstRightIdx !== -1 ? firstRightIdx : idx;
                         const isPrimary = idx === firstRightIdx;
                         yaxisMetaForExport.push({ unit: rightUnit });
-                        return {
+                        return applyBoundsAndLog({
                             seriesName: apexSeries[targetRightIdx].name,
                             show: isPrimary,
                             opposite: true,
@@ -3270,16 +4821,96 @@
                                     style: { color: rightAxisColor, fontSize: '12px', fontWeight: 600, fontFamily: fontCss }
                                 }
                                 : undefined
-                        };
+                        }, rawRightMin, rawRightMax, state.rightAxisLog);
                     }
                 });
             } else {
-                yaxisOptions = {
+                yaxisMetaForExport.push({ unit: leftUnit });
+                yaxisOptions = applyBoundsAndLog({
                     labels: {
-                        formatter: formatDecimalsValue,
+                        formatter: (v) => formatWithUnit(v, leftUnit),
                         style: { colors: textColor, fontSize: '12px', fontFamily: fontCss }
+                    },
+                    title: state.leftAxisTitle.trim()
+                        ? {
+                            text: state.leftAxisTitle.trim(),
+                            style: { color: textColor, fontSize: '12px', fontWeight: 600, fontFamily: fontCss }
+                        }
+                        : undefined
+                }, rawLeftMin, rawLeftMax, state.leftAxisLog);
+            }
+
+            // Repères & Annotations personnalisés (illimités)
+            if (!isCirc && !isRadar && Array.isArray(state.annotations)) {
+                state.annotations.forEach(ann => {
+                    const valStr = String(ann.value ?? '').trim();
+                    if (!valStr) return;
+                    const annColor = ann.color || '#f59e0b';
+                    const annText = String(ann.label || '').trim();
+                    const baseLabel = annText
+                        ? {
+                            borderColor: annColor,
+                            style: {
+                                color: '#ffffff',
+                                background: annColor,
+                                fontSize: '11px',
+                                fontWeight: 700,
+                                fontFamily: fontCss,
+                                padding: { left: 7, right: 7, top: 3, bottom: 3 }
+                            },
+                            text: annText
+                        }
+                        : { text: '' };
+
+                    if (ann.axis === 'x') {
+                        if (isHorizontalBar) {
+                            annotations.yaxis.push({
+                                y: valStr,
+                                borderColor: annColor,
+                                strokeDashArray: 4,
+                                borderWidth: 2,
+                                label: { ...baseLabel, position: 'right', offsetX: -6, offsetY: -4 }
+                            });
+                        } else {
+                            annotations.xaxis.push({
+                                x: valStr,
+                                borderColor: annColor,
+                                strokeDashArray: 4,
+                                borderWidth: 2,
+                                label: { ...baseLabel, orientation: 'horizontal', offsetY: -6 }
+                            });
+                        }
+                    } else {
+                        const numVal = Number(valStr);
+                        if (!Number.isFinite(numVal)) return;
+                        if (isHorizontalBar) {
+                            annotations.xaxis.push({
+                                x: numVal,
+                                borderColor: annColor,
+                                strokeDashArray: 4,
+                                borderWidth: 2,
+                                label: { ...baseLabel, orientation: 'horizontal', offsetY: -6 }
+                            });
+                        } else {
+                            const targetYIdx = dualYAxisActive
+                                ? (Number(ann.yAxis) === 1 ? resolvedPrimaryRightIdx : resolvedPrimaryLeftIdx)
+                                : 0;
+                            annotations.yaxis.push({
+                                y: numVal,
+                                yAxisIndex: targetYIdx,
+                                borderColor: annColor,
+                                strokeDashArray: 4,
+                                borderWidth: 2,
+                                label: {
+                                    ...baseLabel,
+                                    position: (dualYAxisActive && Number(ann.yAxis) === 1) ? 'left' : 'right',
+                                    offsetX: (dualYAxisActive && Number(ann.yAxis) === 1) ? 8 : -8,
+                                    offsetY: -4
+                                }
+                            });
+                        }
                     }
-                };
+                });
             }
 
             const enabledOnSeries = canTrendline
@@ -3298,7 +4929,15 @@
                     zoom: { enabled: false },
                     fontFamily: fontCss,
                     animations: { enabled: animate, speed: 350 },
-                    dropShadow: { enabled: false }
+                    dropShadow: { enabled: false },
+                    events: {
+                        mounted: (ctx) => {
+                            requestAnimationFrame(() => applyPostRenderPolish(ctx.el, estimatedMeta));
+                        },
+                        updated: (ctx) => {
+                            requestAnimationFrame(() => applyPostRenderPolish(ctx.el, estimatedMeta));
+                        }
+                    }
                 },
                 theme: { mode: isDarkMode ? 'dark' : 'light' },
                 colors: colorsList,
@@ -3323,11 +4962,17 @@
                     intersect: isScatter,
                     y: {
                         formatter: (val, opts) => {
+                            const sIdx = opts.seriesIndex;
+                            const dIdx = opts.dataPointIndex;
+                            const isEst = isCirc
+                                ? Boolean(estimatedMatrix[0] && estimatedMatrix[0][sIdx])
+                                : Boolean(estimatedMatrix[sIdx] && estimatedMatrix[sIdx][dIdx]);
+                            const estSuffix = isEst ? ' (Est.)' : '';
                             if (isRadialBar) {
-                                return formatDecimalsValue(rawRadialValues[opts.seriesIndex] ?? 0);
+                                return formatDecimalsValue(rawRadialValues[sIdx] ?? 0) + estSuffix;
                             }
-                            const unit = seriesUnits[opts.seriesIndex] || '';
-                            return formatWithUnit(val, unit);
+                            const unit = seriesUnits[sIdx] || '';
+                            return formatWithUnit(val, unit) + estSuffix;
                         }
                     }
                 },
@@ -3335,9 +4980,11 @@
                     show: state.showLegend,
                     showForSingleSeries: true,
                     position: 'bottom',
+                    horizontalAlign: 'center',
                     fontSize: '13px',
                     fontFamily: fontCss,
                     offsetY: 6,
+                    itemMargin: { horizontal: 10, vertical: 0 },
                     labels: { colors: strongTextColor }
                 },
                 dataLabels: {
@@ -3442,17 +5089,23 @@
                 }
             };
 
+            latestEstimatedMeta = estimatedMeta;
+
             return {
                 options,
                 meta: {
                     type,
+                    isCirc,
                     isHorizontalBar,
                     isRadialBar,
                     dualYAxisActive,
+                    numberFormat: state.numberFormat || 'auto',
+                    leftUnit,
                     rawRadialValues,
                     radialScaleMax,
                     seriesUnits,
-                    yaxisMetaForExport
+                    yaxisMetaForExport,
+                    estimatedMeta
                 }
             };
         }
@@ -3466,12 +5119,28 @@
             captureArea.style.setProperty('--chart-font', getFontCss(state.fontFamily));
 
             const displayTitle = document.getElementById('displayTitle');
-            if (state.title.trim() !== '') {
+            const displaySubtitle = document.getElementById('displaySubtitle');
+            const hasTitle = state.title.trim() !== '';
+            const hasSubtitle = (state.subtitle || '').trim() !== '';
+
+            if (hasTitle) {
                 displayTitle.textContent = state.title;
                 displayTitle.style.display = 'block';
+                displayTitle.classList.toggle('has-subtitle', hasSubtitle);
             } else {
                 displayTitle.textContent = '';
                 displayTitle.style.display = 'none';
+                displayTitle.classList.remove('has-subtitle');
+            }
+
+            if (displaySubtitle) {
+                if (hasSubtitle) {
+                    displaySubtitle.textContent = state.subtitle.trim();
+                    displaySubtitle.style.display = 'block';
+                } else {
+                    displaySubtitle.textContent = '';
+                    displaySubtitle.style.display = 'none';
+                }
             }
 
             const displaySource = document.getElementById('displaySource');
@@ -3489,7 +5158,7 @@
                 const visibleRows = state.rows.filter(r => !r.hidden && r.label.trim() !== '');
                 const avg = computeAverage(visibleRows, false);
                 if (avg !== null) {
-                    avgBadge.textContent = `Moyenne : ${avg.toFixed(2)}`;
+                    avgBadge.textContent = `Moyenne : ${formatNumberValue(avg)}`;
                     avgBadge.style.display = 'inline-flex';
                 } else {
                     avgBadge.style.display = 'none';
@@ -3506,18 +5175,29 @@
 
         function getChartSignature() {
             const seriesSig = state.series.map(s => `${s.type || 'column'}:${Number(s.yAxis) === 1 ? 1 : 0}`).join(',');
+            const annSig = (state.annotations || []).map(a => `${a.axis}:${a.value}:${a.label}:${a.color}:${a.yAxis}`).join(';');
+            const estSig = state.rows.map(r => (r.estimated || []).map(e => (e ? '1' : '0')).join('')).join(',');
             return [
                 state.chartType,
                 state.fontFamily,
+                state.numberFormat,
                 state.showTrendline,
                 state.stacked,
                 state.dualYAxis,
                 state.leftAxisTitle,
                 state.leftAxisUnit,
+                state.leftAxisMin,
+                state.leftAxisMax,
+                state.leftAxisLog,
                 state.rightAxisTitle,
                 state.rightAxisUnit,
+                state.rightAxisMin,
+                state.rightAxisMax,
+                state.rightAxisLog,
                 state.series.length,
-                seriesSig
+                seriesSig,
+                annSig,
+                estSig
             ].join('|');
         }
 
@@ -3684,6 +5364,7 @@
             if (e.key === 'Escape') {
                 closeExportMenu();
                 closeEmbedModal();
+                closeLibraryModal();
             }
         });
 
@@ -3718,8 +5399,13 @@
 
             const fontCss = getFontCss(state.fontFamily);
             const pageTitle = escapeHtml(state.title.trim() || 'Graphique MyPlot');
-            const displayTitleHtml = state.title.trim()
-                ? `<h2 class="export-title">${escapeHtml(state.title.trim())}</h2>`
+            const hasTitle = state.title.trim() !== '';
+            const hasSubtitle = (state.subtitle || '').trim() !== '';
+            const displayTitleHtml = hasTitle
+                ? `<h2 class="export-title${hasSubtitle ? ' has-subtitle' : ''}">${escapeHtml(state.title.trim())}</h2>`
+                : '';
+            const displaySubtitleHtml = hasSubtitle
+                ? `<p class="export-subtitle">${escapeHtml(state.subtitle.trim())}</p>`
                 : '';
 
             const avgBadgeEl = document.getElementById('avgBadge');
@@ -3814,6 +5500,42 @@
                 '    color: var(--text-main);',
                 '    margin: 0 0 1.25rem 0;',
                 '}',
+                '.export-title.has-subtitle { margin-bottom: 0.35rem; }',
+                '.export-subtitle {',
+                '    text-align: center;',
+                '    font-size: 0.92rem;',
+                '    font-weight: 500;',
+                '    color: var(--text-muted);',
+                '    margin: 0 0 1.15rem 0;',
+                '    line-height: 1.4;',
+                '}',
+                '#mainChart .apexcharts-legend {',
+                '    flex-wrap: nowrap !important;',
+                '    justify-content: center !important;',
+                '    align-items: center !important;',
+                '    gap: 0 14px !important;',
+                '    overflow-x: auto !important;',
+                '    max-width: 100% !important;',
+                '}',
+                '#mainChart .apexcharts-legend-series {',
+                '    display: inline-flex !important;',
+                '    align-items: center !important;',
+                '    white-space: nowrap !important;',
+                '    flex-shrink: 0 !important;',
+                '    margin: 0 !important;',
+                '}',
+                '#mainChart .apexcharts-legend-text { white-space: nowrap !important; }',
+                '#mainChart .myplot-estimated-bar {',
+                '    fill-opacity: 0.36 !important;',
+                '    stroke-dasharray: 5 3 !important;',
+                '    stroke-width: 2 !important;',
+                '    stroke-opacity: 0.95 !important;',
+                '}',
+                '#mainChart .myplot-estimated-slice {',
+                '    fill-opacity: 0.38 !important;',
+                '    stroke-dasharray: 5 3 !important;',
+                '    stroke-width: 2 !important;',
+                '}',
                 '.avg-badge {',
                 '    align-self: center;',
                 '    margin-bottom: 0.75rem;',
@@ -3886,15 +5608,68 @@
                 `    const meta = ${safeJsonForScript(meta)};`,
                 '    function fmtNum(val) {',
                 '        const n = Number(val);',
-                "        return Number.isFinite(n) ? n.toFixed(2) : '0.00';",
+                "        if (!Number.isFinite(n)) return '0';",
+                "        const mode = meta.numberFormat || 'auto';",
+                "        if (mode === '0') return String(Math.round(n));",
+                "        if (mode === '1') return n.toFixed(1);",
+                "        if (mode === '2') return n.toFixed(2);",
+                '        if (Math.abs(n) > 0 && Math.abs(n) < 0.01) return Number(n.toPrecision(2)).toString();',
+                '        const r = Math.round((n + Number.EPSILON) * 100) / 100;',
+                "        if (r === 0) return '0';",
+                '        if (Number.isInteger(r)) return String(r);',
+                "        return r.toFixed(2).replace(/\\.?0+$/, '');",
                 '    }',
                 '    function fmtUnit(val, unit) {',
                 '        const s = fmtNum(val);',
                 "        const u = String(unit || '').trim();",
                 "        return u ? s + ' ' + u : s;",
                 '    }',
+                '    function polishChart(el) {',
+                "        const host = el || document.querySelector('#mainChart');",
+                '        if (!host) return;',
+                "        const legend = host.querySelector('.apexcharts-legend');",
+                '        if (legend && host.clientWidth > 0 && legend.scrollWidth > host.clientWidth - 16) {',
+                "            legend.style.gap = '0 8px';",
+                "            legend.querySelectorAll('.apexcharts-legend-text').forEach(function (t) { t.style.fontSize = '11px'; });",
+                '        }',
+                '        const est = meta.estimatedMeta;',
+                '        if (!est || !est.hasAnyEstimated) return;',
+                '        if (est.isCirc) {',
+                "            host.querySelectorAll('.apexcharts-pie-series, .apexcharts-radial-series').forEach(function (g, idx) {",
+                "                const ai = g.getAttribute('data:realIndex');",
+                "                const ri = ai !== null ? Number(ai) : idx;",
+                '                if (est.estimatedMatrix[0] && est.estimatedMatrix[0][ri]) {',
+                "                    const p = g.querySelector('path');",
+                "                    if (p) { p.classList.add('myplot-estimated-slice'); p.setAttribute('fill-opacity', '0.38'); p.setAttribute('stroke-dasharray', '5 3'); p.setAttribute('stroke-width', '2'); }",
+                '                }',
+                '            });',
+                '            return;',
+                '        }',
+                "        host.querySelectorAll('.apexcharts-bar-series .apexcharts-series').forEach(function (g, idx) {",
+                "            const ai = g.getAttribute('data:realIndex');",
+                "            const ri = g.getAttribute('rel');",
+                '            const sIdx = ai !== null ? Number(ai) : (ri !== null ? Number(ri) - 1 : idx);',
+                '            const flags = est.estimatedMatrix[sIdx];',
+                '            if (!flags) return;',
+                "            g.querySelectorAll('.apexcharts-bar-area').forEach(function (bar) {",
+                "                const j = Number(bar.getAttribute('j'));",
+                '                if (j >= 0 && flags[j]) {',
+                "                    const col = (est.estimatedColors[sIdx] && est.estimatedColors[sIdx][j]) || bar.getAttribute('fill') || '#3b82f6';",
+                "                    bar.classList.add('myplot-estimated-bar');",
+                "                    bar.setAttribute('fill-opacity', '0.36');",
+                "                    bar.setAttribute('stroke', col);",
+                "                    bar.setAttribute('stroke-width', '2');",
+                "                    bar.setAttribute('stroke-dasharray', '5 3');",
+                '                }',
+                '            });',
+                '        });',
+                '    }',
+                '    options.chart.events = {',
+                '        mounted: function (ctx) { requestAnimationFrame(function () { polishChart(ctx.el); }); },',
+                '        updated: function (ctx) { requestAnimationFrame(function () { polishChart(ctx.el); }); }',
+                '    };',
                 '    if (meta.isHorizontalBar && options.xaxis && options.xaxis.labels) {',
-                '        options.xaxis.labels.formatter = fmtNum;',
+                "        options.xaxis.labels.formatter = function (v) { return fmtUnit(v, meta.leftUnit || ''); };",
                 '    }',
                 '    if (Array.isArray(options.yaxis)) {',
                 '        options.yaxis.forEach(function (axis, idx) {',
@@ -3904,15 +5679,18 @@
                 '            }',
                 '        });',
                 '    } else if (!meta.isHorizontalBar && options.yaxis && options.yaxis.labels) {',
-                '        options.yaxis.labels.formatter = fmtNum;',
+                "        options.yaxis.labels.formatter = function (v) { return fmtUnit(v, meta.leftUnit || ''); };",
                 '    }',
                 '    if (options.tooltip && options.tooltip.y) {',
                 '        options.tooltip.y.formatter = function (val, opts) {',
+                '            const est = meta.estimatedMeta;',
+                '            const isEst = est && (est.isCirc ? (est.estimatedMatrix[0] && est.estimatedMatrix[0][opts.seriesIndex]) : (est.estimatedMatrix[opts.seriesIndex] && est.estimatedMatrix[opts.seriesIndex][opts.dataPointIndex]));',
+                "            const suf = isEst ? ' (Est.)' : '';",
                 '            if (meta.isRadialBar) {',
-                '                return fmtNum(meta.rawRadialValues[opts.seriesIndex] || 0);',
+                '                return fmtNum(meta.rawRadialValues[opts.seriesIndex] || 0) + suf;',
                 '            }',
                 "            const unit = (meta.seriesUnits && meta.seriesUnits[opts.seriesIndex]) || '';",
-                '            return fmtUnit(val, unit);',
+                '            return fmtUnit(val, unit) + suf;',
                 '        };',
                 '    }',
                 '    if (options.dataLabels) {',
@@ -3975,6 +5753,7 @@
                 `    ${LT}div class="export-stage">`,
                 `        ${LT}div class="${cardClasses}">`,
                 displayTitleHtml ? `            ${displayTitleHtml}` : '',
+                displaySubtitleHtml ? `            ${displaySubtitleHtml}` : '',
                 avgBadgeHtml ? `            ${avgBadgeHtml}` : '',
                 `            ${LT}div id="mainChart">${LT}/div>`,
                 displaySourceHtml ? `            ${displaySourceHtml}` : '',
@@ -4052,8 +5831,9 @@
 
             const padX = 40;
             const hasTitle = state.title.trim() !== '';
+            const hasSubtitle = (state.subtitle || '').trim() !== '';
             const hasAvgBadge = document.getElementById('avgBadge').style.display !== 'none';
-            const topPad = 36 + (hasTitle ? 46 : 0) + (hasAvgBadge ? 30 : 0);
+            const topPad = 36 + (hasTitle ? 42 : 0) + (hasSubtitle ? 26 : 0) + (hasAvgBadge ? 30 : 0);
             const bottomPad = 48;
 
             const totalW = chartW + padX * 2;
@@ -4080,10 +5860,11 @@
                 outer.appendChild(bg);
             }
 
+            let cursorY = 50;
             if (hasTitle) {
                 const titleNode = document.createElementNS(NS, 'text');
                 titleNode.setAttribute('x', String(totalW / 2));
-                titleNode.setAttribute('y', '52');
+                titleNode.setAttribute('y', String(cursorY));
                 titleNode.setAttribute('text-anchor', 'middle');
                 titleNode.setAttribute('fill', titleColor);
                 titleNode.setAttribute('font-size', '22');
@@ -4091,12 +5872,27 @@
                 titleNode.setAttribute('font-family', fontCss);
                 titleNode.textContent = state.title.trim();
                 outer.appendChild(titleNode);
+                cursorY += 26;
+            }
+
+            if (hasSubtitle) {
+                const subNode = document.createElementNS(NS, 'text');
+                subNode.setAttribute('x', String(totalW / 2));
+                subNode.setAttribute('y', String(cursorY));
+                subNode.setAttribute('text-anchor', 'middle');
+                subNode.setAttribute('fill', mutedColor);
+                subNode.setAttribute('font-size', '14');
+                subNode.setAttribute('font-weight', '500');
+                subNode.setAttribute('font-family', fontCss);
+                subNode.textContent = state.subtitle.trim();
+                outer.appendChild(subNode);
+                cursorY += 24;
             }
 
             if (hasAvgBadge) {
                 const avgNode = document.createElementNS(NS, 'text');
                 avgNode.setAttribute('x', String(totalW / 2));
-                avgNode.setAttribute('y', hasTitle ? '82' : '50');
+                avgNode.setAttribute('y', String(cursorY));
                 avgNode.setAttribute('text-anchor', 'middle');
                 avgNode.setAttribute('fill', isDarkMode ? '#38bdf8' : '#0284c7');
                 avgNode.setAttribute('font-size', '13');
@@ -4272,6 +6068,8 @@
                 renderPalettes();
                 renderSeriesList();
                 renderDataList();
+                renderAnnotationsList();
+                updateLibraryCountBadge();
                 setupSidebarDropzone();
             }
             lucide.createIcons();
